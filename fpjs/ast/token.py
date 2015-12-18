@@ -43,13 +43,13 @@ class ES5Token(object):
         return self.__repr__()
 
     def __repr__(self):
-        return "TOKEN@(%s, %s): %s %s" % (
+        return "TOKEN@(%03s, %03s): %-30s %s" % (
             str(self.position[0]), str(self.position[1]),
             self.__class__.__name__, self.value)
 
     def __eq__(self, b):
         """
-        just compare class
+        just compile class
         """
         return self.__class__ == b.__class__ or self.__class == b
 
@@ -58,52 +58,68 @@ class ES5Token(object):
         """
         call on match
         """
+        cur_pos = copy.deepcopy(position)
+
         if not isinstance(ret, types.StringType):
-            ret = ret.group()[0]
+            ret = ret.group()
             lexer.content = lexer.content[len(ret):]
             lexer._pos[1] += len(ret)
 
-        return cls(copy.deepcopy(position), ret)
+        return cls(cur_pos, ret)
+
+boundary = r"(?=[^_$a-zA-Z0-9])"
+
+
+class ES5Var(ES5Token):
+    pattern = re.compile(r"var" + boundary)
 
 
 class ES5Function(ES5Token):
-    pattern = "function"
+    pattern = re.compile(r"function" + boundary)
+
+
+class ES5Return(ES5Token):
+    pattern = re.compile("return" + boundary)
 
 
 class ES5Null(ES5Token):
-    pattern = "null"
+    pattern = re.compile("null" + boundary)
 
 
 class ES5True(ES5Token):
-    pattern = "true"
+    pattern = re.compile("true" + boundary)
 
 
 class ES5False(ES5Token):
-    pattern = "false"
+    pattern = re.compile("false" + boundary)
 
 
 class ES5Undefined(ES5Token):
-    pattern = "undefined"
+    pattern = re.compile("undefined" + boundary)
 
 
 class ES5For(ES5Token):
-    pattern = "for"
+    pattern = re.compile("for" + boundary)
 
 
 class ES5Do(ES5Token):
-    pattern = "do"
+    pattern = re.compile("do" + boundary)
 
 
 class ES5While(ES5Token):
-    pattern = "while"
+    pattern = re.compile("while" + boundary)
 
 
 class ES5If(ES5Token):
-    pattern = "if"
+    pattern = re.compile("if" + boundary)
 
 
 class ES5Else(ES5Token):
-    pattern = "else"
+    pattern = re.compile("else" + boundary)
+
+
+class ES5New(ES5Token):
+    pattern = re.compile("new" + boundary)
 
 
 class ES5Comma(ES5Token):
@@ -159,14 +175,20 @@ class ES5BinaryOperator(ES5Token):
 
 
 class ES5Number(ES5Token):
-    pattern = re.compile(r"(?:0[x|X])?\d+")
+    pattern = re.compile(r"(?:0[x|X])?\d+" + boundary)
 
 
 class ES5String(ES5Token):
     pass  # handle by lexer
 
 
+class ES5Id(ES5Token):
+    pattern = re.compile(r"[_$a-zA-Z][_$a-zA-Z0-9]*" + boundary)
+
+
 _lex_cls_order = (
+    ES5Var,
+    ES5New,
     ES5Function,
     ES5Null,
     ES5True,
@@ -191,5 +213,5 @@ _lex_cls_order = (
     ES5UnaryOperator,
     ES5BinaryOperator,
     ES5Number,
-    ES5SemiColon
-)
+    ES5SemiColon,
+    ES5Id)

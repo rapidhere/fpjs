@@ -18,7 +18,47 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 predefined licenses headers
 ref from http://opensource.org
 
-parse javascript code into AST(abstract syntax tree)
+parse the es5 into ast
 """
 
 __author__ = "rapidhere"
+
+from lex import ES5Lexer
+from absyn import *
+from token import *
+
+
+def _parse_programm(self):
+    prog = ES5MultipleStatement()
+    while self.lexer.has_next():
+        prog.append(self._parse_statement())
+
+    return prog
+
+
+def _parse_statement(self):
+    token = self.lexer.next_token()
+
+    if token == ES5Function:
+        return self._parse_function(token)
+    elif token == ES5For:
+        pass
+    elif token == ES5While:
+        pass
+    elif token == ES5If:
+        pass
+
+
+def _parse_function(self, func_token):
+    pass
+
+
+class ES5Parse(object):
+    def __init__(self):
+        self.lexer = ES5Lexer()
+
+    def load(self, content):
+        self.lexer.update(content)
+
+    def parse(self):
+        return _parse_programm(self.lexer)

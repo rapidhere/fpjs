@@ -24,7 +24,8 @@ javascript(es5) tokens
 __author__ = "rapidhere"
 
 import types
-from token import _lex_cls_order
+import copy
+from token import _lex_cls_order, ES5String
 from fpjs.exception import LexicalException
 
 __all__ = ["ES5Lexer"]
@@ -50,7 +51,55 @@ class ES5Lexer(object):
         self.content += content
 
     def _on_state_comment(self):
-        pass
+        while self.content:
+            self._pos[1] += 1
+            ch = self.content[0]
+            self.content = self.content[1:]
+
+            if ch == '\n':
+                self._pos = [self._pos[0] + 1, 1]
+
+                if self._state_start_ch == "//":
+                    return
+            elif ch == "*" and self.content[0] == "/":
+                self._pos[1] += 1
+                self.content = self.content[1:]
+                return
+
+    def _on_state_string(self):
+        ch = self._state_start_ch
+        self.content = self.content[1:]
+        self._pos[1] += 1
+        ret = ""
+
+        while self.content:
+            self._pos[1] += 1
+            ch = self.content[0]
+            self.content = self.content[1:]
+
+            if ch == "\n":
+                raise LexicalException("unexpected new line in string literal")
+            elif ch == "\\":
+                self._pos[1] += 1
+                next_ch = self.content[0]
+                self.content = self.content[1:]
+
+                if next_ch == "n":
+                    ret += "\n"
+                elif next_ch == "r":
+                    ret += "\r"
+                elif next_ch == '"':
+                    ret += '"'
+                elif next_ch == "'":
+                    ret += "'"
+                elif next_ch == "\\":
+                    ret += "\\"
+                else:
+                    raise LexicalException("unknown escape char")
+            elif ch == self._state_start_ch:
+                return ret
+            else:
+                ret += ch
 
     def _handle_white_space(self):
         if self.content[0] == '\n':
@@ -59,6 +108,12 @@ class ES5Lexer(object):
             self._pos[1] += 1
 
         self.content = self.content[1:]
+
+    def has_next(self):
+        """
+        if has left token to parse
+        """
+        return len(self.content) > 0
 
     def next_token(self):
         """
@@ -72,11 +127,16 @@ class ES5Lexer(object):
 
         while self.content:
             if self.content[0] == "'" or self.content[0] == '"':
-                self._on_state_string()
+                self._state_start_ch = self.content[0]
+                self._next_token = ES5String(copy.deepcopy(self._pos), self._on_state_string())
+                self._state_start_ch = None
             elif self.content.startswith("//") or self.content.startswith("/*"):
+                self._state_start_ch = self.content[:2]
                 self._on_state_comment()
-            elif self.content[0] in " \t\n\r":
-
+                self._state_start_ch = None
+                continue
+            elif self.content[0] in "\r\n\t \f\v":
+                self._handle_white_space()
                 continue
             else:
                 for token in _lex_cls_order:
@@ -96,7 +156,7 @@ class ES5Lexer(object):
                         break
 
             if self._next_token is None:
-                raise LexicalException()
+                raise LexicalException("cannot parse token")
 
             return self._next_token
 

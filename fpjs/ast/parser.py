@@ -18,22 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 predefined licenses headers
 ref from http://opensource.org
 
-javascript(es5) lexicial parser
+parse javascript code into AST(abstract syntax tree)
 """
 
 __author__ = "rapidhere"
-
-
-class ES5AbstractSyntax(object):
-    pass
-
-
-class ES5MultipleStatement(ES5AbstractSyntax):
-    def __init__(self):
-        self.statments = []
-
-    def append(self, statement):
-        self.statments.append(statement)
-
-    def __iter__(self):
-        return iter(self.statments)
