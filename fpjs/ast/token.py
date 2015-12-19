@@ -20,11 +20,24 @@ ref from http://opensource.org
 
 es5 tokens (not full version)
 
-regex, with, ?: statement is not supported
+TODO:
+
+regex
+
+?:, ++, --
+
+with, instanceof, typeof, switch, case, try, catch, finally, void, break, continue,
+this, default, throw, delete, in
+
+octocal and hexical number
 """
 
 __author__ = "rapidhere"
-
+__all__ = [
+    "ES5Var", "ES5New", "ES5Function", "ES5Null", "ES5True", "ES5False", "ES5Undefined", "ES5For", "ES5Do",
+    "ES5While", "ES5If", "ES5Else", "ES5Comma", "ES5Colon", "ES5Dot", "ES5SemiColon", "ES5LeftParenthesis",
+    "ES5RightParenthesis", "ES5LeftBracket", "ES5RightBracket", "ES5LeftBrace", "ES5RightBrace", "ES5Minus",
+    "ES5UnaryOperator", "ES5BinaryOperator", "ES5Number", "ES5SemiColon", "ES5Id"]
 
 import re
 import types
@@ -171,7 +184,8 @@ class ES5UnaryOperator(ES5Token):
 
 
 class ES5BinaryOperator(ES5Token):
-    pattern = re.compile(r"[\+\-\*/%><\|&=^]|==|===|>=|<=|>==|<==|!=|!==|&&|\|\|\+=|\-=|\*=|\=|%=|\|=|&=|^=")
+    pattern = re.compile(r"[\+\-\*/%><\|&=^]|==|===|>=|<=|>==|<==|!=|!==|&&|\|\|\+=|\-=|\*=|\=|%=|\|=|&=|^=|<<|>>|>>>|"
+                         r"<<=|>>=|>>>=")
 
 
 class ES5Number(ES5Token):
