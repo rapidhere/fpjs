@@ -19,6 +19,10 @@ predefined licenses headers
 ref from http://opensource.org
 
 parse javascript code into AST(abstract syntax tree)
+
+TODO:
+
+automatic semicolon insertion (probably never support)
 """
 
 __author__ = "rapidhere"

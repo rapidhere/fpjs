@@ -30,6 +30,8 @@ with, instanceof, typeof, switch, case, try, catch, finally, void, break, contin
 this, default, throw, delete, in
 
 octocal and hexical number
+
+line-continuation, more esacpe sequence
 """
 
 __author__ = "rapidhere"
