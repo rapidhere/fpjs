@@ -41,7 +41,7 @@ class ES5Lexer(object):
         self.update(content)
 
         self._state_start_ch = None
-        self._next_token = None
+        self._stored_tokens = []
         self._pos = [1, 1]
 
     def update(self, content):
@@ -78,7 +78,7 @@ class ES5Lexer(object):
             self.content = self.content[1:]
 
             if ch == "\n":
-                raise LexicalException("unexpected new line in string literal")
+                raise LexicalException(self._pos, "unexpected new line in string literal")
             elif ch == "\\":
                 self._pos[1] += 1
                 next_ch = self.content[0]
@@ -95,7 +95,7 @@ class ES5Lexer(object):
                 elif next_ch == "\\":
                     ret += "\\"
                 else:
-                    raise LexicalException("unknown escape char")
+                    raise LexicalException(self._pos, "unknown escape char")
             elif ch == self._state_start_ch:
                 return ret
             else:
@@ -113,9 +113,33 @@ class ES5Lexer(object):
         """
         if has left token to parse
         """
-        return len(self.content) > 0
+        return self.peek_token() is not None
+
+    def back_token(self, tok):
+        """
+        push a token back into content flow
+        """
+        self._stored_tokens.append(tok)
+
+    def peek_token(self):
+        """
+        get a token, without remove it from content
+        """
+        if not self._stored_tokens:
+            self._stored_tokens.append(self._next_token())
+
+        return self._stored_tokens[-1]
 
     def next_token(self):
+        """
+        get next token, and remove it from content
+        """
+        if not self._stored_tokens:
+            self._stored_tokens.append(self._next_token())
+
+        return self._stored_tokens.pop()
+
+    def _next_token(self):
         """
         get next token
 
@@ -123,12 +147,12 @@ class ES5Lexer(object):
 
         raise LexicalException on parse error
         """
-        self._next_token = None
+        _next_token = None
 
         while self.content:
             if self.content[0] == "'" or self.content[0] == '"':
                 self._state_start_ch = self.content[0]
-                self._next_token = ES5String(copy.deepcopy(self._pos), self._on_state_string())
+                _next_token = ES5String(copy.deepcopy(self._pos), self._on_state_string())
                 self._state_start_ch = None
             elif self.content.startswith("//") or self.content.startswith("/*"):
                 self._state_start_ch = self.content[:2]
@@ -143,22 +167,22 @@ class ES5Lexer(object):
                     pat = token.pattern
                     if isinstance(pat, types.StringType):
                         if self.content.startswith(pat):
-                            self._next_token = token.on_match(self, self._pos, pat)
+                            _next_token = token.on_match(self, self._pos, pat)
                             self.content = self.content[len(pat):]
                             self._pos[1] += len(pat)
                     else:
                         r = pat.match(self.content)
 
                         if r:
-                            self._next_token = token.on_match(self, self._pos, r)
+                            _next_token = token.on_match(self, self._pos, r)
 
-                    if self._next_token is not None:
+                    if _next_token is not None:
                         break
 
-            if self._next_token is None:
-                raise LexicalException("cannot parse token")
+            if _next_token is None:
+                raise LexicalException(self._pos, "cannot parse token")
 
-            return self._next_token
+            return _next_token
 
         return None
 

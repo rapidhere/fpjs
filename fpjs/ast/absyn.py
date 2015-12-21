@@ -18,17 +18,39 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 predefined licenses headers
 ref from http://opensource.org
 
-javascript(es5) lexicial parser
+javascript(es5) abstract syntax tree components
+
+for more info please refer to the ES5 stantards (https://es5.github.io/)
 """
 
 __author__ = "rapidhere"
 
 
 class ES5AbstractSyntax(object):
+    _indent_char = "  "
+
+    def __eq__(self, b):
+        return issubclass(self.__class__, b.__class__) or issubclass(self.__class__, b)
+
+    def __ne__(self, b):
+        return not self.__eq__(b)
+
+    @property
+    def position(self):
+        pass
+
+    def _print(self, indent, msg):
+        print (self._indent_char * indent) + str(msg)
+
+    def ast_print(self, indent=0):
+        self._print(indent, self)
+
+
+class Statement(ES5AbstractSyntax):
     pass
 
 
-class ES5MultipleStatement(ES5AbstractSyntax):
+class MultipleStatement(ES5AbstractSyntax):
     def __init__(self):
         self.statments = []
 
@@ -37,3 +59,103 @@ class ES5MultipleStatement(ES5AbstractSyntax):
 
     def __iter__(self):
         return iter(self.statments)
+
+    def ast_print(self, indent=0):
+        self._print(indent, "MultipleStatement:")
+
+        for stat in self.statments:
+            stat.ast_print(indent + 1)
+
+
+class VariableStatement(Statement):
+    def __init__(self, var_token):
+        self.var = var_token
+        self.declartions = []
+
+    def append_declaration(self, dec):
+        self.declartions.append(dec)
+
+    def __iter__(self):
+        return iter(self.declartions)
+
+    def position(self):
+        return self.var.position
+
+    def ast_print(self, indent=0):
+        self._print(indent, "VariableStatement:")
+
+        for dec in self.declartions:
+            dec.ast_print(indent + 1)
+
+
+class EmptyStatement(Statement):
+    def __init__(self, semicolon):
+        self.semicolon = semicolon
+
+    def position(self):
+        return self.semicolon.position
+
+
+class VariableDeclaration(ES5AbstractSyntax):
+    def __init__(self, var_id, init=None):
+        self.var_id = var_id
+        self.init = init
+
+    def position(self):
+        return self.var_id.position
+
+    def ast_print(self, indent=0):
+        self._print(indent, "VariableDeclaration")
+        self._print(indent + 1, "var_id: " + str(self.var_id))
+        if self.init:
+            self.init.ast_print(indent + 1)
+
+
+class Expression(ES5AbstractSyntax):
+    pass
+
+
+class MultipleExpression(Expression):
+    def __init__(self):
+        self.expressions = []
+
+    def append_expression(self, exp):
+        self.expressions.append(exp)
+
+    def position(self):
+        self.expressions[0].position
+
+
+class AssignmentExpression(Expression):
+    def __init__(self, left_hand, right_hand):
+        self.left_hand = left_hand
+        self.right_hand = right_hand
+
+    def position(self):
+        return self.left_hand.position
+
+
+class LeftHandExpression(Expression):
+    pass
+
+
+class MemberExpression(LeftHandExpression):
+    def __init__(self, group, member):
+        self.group = group
+        self.member = member
+
+    def position(self):
+        return self.group.position
+
+
+class CallExpression(LeftHandExpression):
+    pass
+
+
+class PrimaryExpression(Expression):
+    def __init__(self, value):
+        self.value = value
+
+    def position(self):
+        # compatible for all tokens and expressions
+        return self.value.position

@@ -39,7 +39,7 @@ __all__ = [
     "ES5Var", "ES5New", "ES5Function", "ES5Null", "ES5True", "ES5False", "ES5Undefined", "ES5For", "ES5Do",
     "ES5While", "ES5If", "ES5Else", "ES5Comma", "ES5Colon", "ES5Dot", "ES5SemiColon", "ES5LeftParenthesis",
     "ES5RightParenthesis", "ES5LeftBracket", "ES5RightBracket", "ES5LeftBrace", "ES5RightBrace", "ES5Minus",
-    "ES5UnaryOperator", "ES5BinaryOperator", "ES5Number", "ES5SemiColon", "ES5Id"]
+    "ES5UnaryOperator", "ES5BinaryOperator", "ES5Number", "ES5SemiColon", "ES5Id", "ES5Return"]
 
 import re
 import types
@@ -55,7 +55,7 @@ class ES5Token(object):
         self.value = value
 
     def __str__(self):
-        return self.__repr__()
+        return "%s: %s" % (self.__class__.__name__, self.value)
 
     def __repr__(self):
         return "TOKEN@(%03s, %03s): %-30s %s" % (
@@ -66,7 +66,10 @@ class ES5Token(object):
         """
         just compile class
         """
-        return self.__class__ == b.__class__ or self.__class == b
+        return self.__class__ == b.__class__ or self.__class__ == b
+
+    def __ne__(self, b):
+        return not self.__eq__(b)
 
     @classmethod
     def on_match(cls, lexer, position, ret):

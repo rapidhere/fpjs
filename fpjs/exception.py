@@ -22,7 +22,24 @@ javascript(es5) tokens
 """
 
 __author__ = "rapidhere"
+__all__ = ["LexicalException", "SyntaxExecption", "UnexpectedTokenException"]
 
 
 class LexicalException(Exception):
-    pass
+    def __init__(self, pos, msg):
+        Exception.__init__(self, "line %d, %d: %s" % (pos[0], pos[1], msg))
+
+
+class SyntaxExecption(Exception):
+    def __init__(self, pos, msg):
+        Exception.__init__(self, "line %d, %d: %s" % (pos[0], pos[1], msg))
+
+
+class UnexpectedTokenException(SyntaxExecption):
+    def __init__(self, token):
+        Exception.__init__(self, token.position, "unexpeted token: " + token.value)
+
+
+class UnexpectedExpression(SyntaxExecption):
+    def __init__(self, expression):
+        Exception.__init__(self, expression.position, "unexpected expression")
