@@ -24,7 +24,7 @@ some parser helpers
 __author__ = "rapidhere"
 __all__ = ["expect_token", "expect_next", "expect_absyn"]
 
-from fpjs.exception import UnexpectedTokenException, UnexpectedExpression
+from fpjs.exception import UnexpectedTokenException, UnexpectedExpression, UnexpectEOF
 from token import *
 from absyn import *
 
@@ -49,11 +49,11 @@ def expect_token(token, token_cls, token_val=None):
 
     raise UnexpectedTokenException if fail
     """
-    if token != token_cls:
-        raise UnexpectedTokenException(token)
-
-    if token_val is not None and token_val != token.value:
-        raise UnexpectedTokenException(token)
+    if token != token_cls or (token_val is not None and token_val != token.value):
+        if token:
+            raise UnexpectedTokenException(token)
+        else:
+            raise UnexpectEOF()
 
     return token
 
