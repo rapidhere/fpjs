@@ -67,6 +67,23 @@ class MultipleStatement(ES5AbstractSyntax):
             stat.ast_print(indent + 1)
 
 
+class BlockStatement(Statement):
+    def __init__(self):
+        self.statments = []
+
+    def append(self, statement):
+        self.statments.append(statement)
+
+    def __iter__(self):
+        return iter(self.statments)
+
+    def ast_print(self, indent=0):
+        self._print(indent, "BlockStatement")
+
+        for stat in self.statments:
+            stat.ast_print(indent + 1)
+
+
 class VariableStatement(Statement):
     def __init__(self, var_token):
         self.var = var_token
@@ -88,12 +105,27 @@ class VariableStatement(Statement):
             dec.ast_print(indent + 1)
 
 
+class ExpressionStatement(Statement):
+    def __init__(self, exp):
+        self.expression = exp
+
+    def position(self):
+        return self.expression.position
+
+    def ast_print(self, indent=0):
+        self._print(indent, "ExpressionStatement:")
+        self.expression.ast_print(indent + 1)
+
+
 class EmptyStatement(Statement):
     def __init__(self, semicolon):
         self.semicolon = semicolon
 
     def position(self):
         return self.semicolon.position
+
+    def ast_print(self, indent=0):
+        self._print(indent, "EmptyStatement")
 
 
 class VariableDeclaration(ES5AbstractSyntax):
@@ -127,12 +159,41 @@ class MultipleExpression(Expression):
 
 
 class AssignmentExpression(Expression):
-    def __init__(self, left_hand, right_hand):
+    def __init__(self, left_hand, op, right_hand):
         self.left_hand = left_hand
         self.right_hand = right_hand
+        self.operator = op
 
     def position(self):
         return self.left_hand.position
+
+    def ast_print(self, indent=0):
+        self._print(indent, "AssignmentExpression:")
+        self._print(indent + 1, self.operator)
+        self.left_hand.ast_print(indent + 1)
+        self.right_hand.ast_print(indent + 1)
+
+
+class BinaryExpression(Expression):
+    def __init__(self, left, op, right):
+        self.left = left
+        self.operator = op
+        self.right = right
+
+    def position(self):
+        return self.left.position
+
+    def ast_print(self, indent=0):
+        self._print(indent, "BinaryExpression:")
+        self._print(indent + 1, self.operator)
+        self.left.ast_print(indent + 1)
+        self.right.ast_print(indent + 1)
+
+
+class UnaryExpression(Expression):
+    def __init__(self, op, exp):
+        self.operator = op
+        self.expression = exp
 
 
 class LeftHandExpression(Expression):
@@ -152,10 +213,14 @@ class CallExpression(LeftHandExpression):
     pass
 
 
-class PrimaryExpression(Expression):
+class PrimaryExpression(MemberExpression):
     def __init__(self, value):
         self.value = value
 
     def position(self):
         # compatible for all tokens and expressions
         return self.value.position
+
+    def ast_print(self, indent=0):
+        self._print(indent, "PrimaryExpression:")
+        self._print(indent + 1, self.value)

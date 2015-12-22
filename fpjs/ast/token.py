@@ -38,7 +38,7 @@ __author__ = "rapidhere"
 __all__ = [
     "ES5Var", "ES5New", "ES5Function", "ES5Null", "ES5True", "ES5False", "ES5Undefined", "ES5For", "ES5Do",
     "ES5While", "ES5If", "ES5Else", "ES5Comma", "ES5Colon", "ES5Dot", "ES5SemiColon", "ES5LeftParenthesis",
-    "ES5RightParenthesis", "ES5LeftBracket", "ES5RightBracket", "ES5LeftBrace", "ES5RightBrace", "ES5Minus",
+    "ES5RightParenthesis", "ES5LeftBracket", "ES5RightBracket", "ES5LeftBrace", "ES5RightBrace", "ES5String",
     "ES5UnaryOperator", "ES5BinaryOperator", "ES5Number", "ES5SemiColon", "ES5Id", "ES5Return"]
 
 import re
@@ -180,17 +180,13 @@ class ES5RightBrace(ES5Token):
     pattern = "}"
 
 
-class ES5Minus(ES5Token):
-    pattern = "-"
-
-
 class ES5UnaryOperator(ES5Token):
     pattern = re.compile(r"[~!]")
 
 
 class ES5BinaryOperator(ES5Token):
-    pattern = re.compile(r"[\+\-\*/%><\|&=^]|==|===|>=|<=|>==|<==|!=|!==|&&|\|\|\+=|\-=|\*=|\=|%=|\|=|&=|^=|<<|>>|>>>|"
-                         r"<<=|>>=|>>>=")
+    pattern = re.compile(r"===|==|>=|<=|>=|<=|!==|!=|&&|\|\||\||&|\+=|\-=|\*=|\=|%=|\|=|&=|^="
+                         r"|<<=|>>>=|>>=|<<|>>|>>>|[\+\-\*/%><=^]")
 
 
 class ES5Number(ES5Token):
@@ -228,7 +224,6 @@ _lex_cls_order = (
     ES5RightBracket,
     ES5LeftBrace,
     ES5RightBrace,
-    ES5Minus,
     ES5UnaryOperator,
     ES5BinaryOperator,
     ES5Number,

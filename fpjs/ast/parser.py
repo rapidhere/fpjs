@@ -54,6 +54,8 @@ def parse_programm(lexer):
     prog = MultipleStatement()
     while lexer.has_next():
         ret = parse_statement(lexer)
+        if not ret:
+            raise UnexpectedTokenException(lexer.next_token())
         prog.append(ret)
 
     return prog
@@ -74,14 +76,40 @@ def parse_statement(lexer):
     elif token == ES5While:
         pass
     elif token == ES5Function:
-        return parse_function(lexer, token)
+        return parse_function_statement(lexer, token)
     elif token == ES5Return:
         pass
     elif token == ES5LeftBrace:
-        # TODO: block statment or expression statment
-        pass
+        r = BlockStatement()
+        lexer.next_token()
+        while lexer.has_next():
+            stat = parse_statement(lexer)
+            if not stat:
+                break
+            r.append(stat)
+        expect_next(lexer, ES5RightBrace)
+        return r
+    else:
+        r = parse_expression_statement(lexer)
+        if not r:
+            None
 
-    raise UnexpectedTokenException(token)
+        return r
+
+
+def parse_expression_statement(lexer):
+    tok = lexer.peek_token()
+
+    if tok == ES5LeftBrace or tok == ES5Function:
+        return None
+
+    exp = parse_expression(lexer)
+
+    if not exp:
+        return None
+    expect_next(lexer, ES5SemiColon)
+
+    return ExpressionStatement(exp)
 
 
 def parse_var_statement(lexer):
@@ -123,7 +151,7 @@ def parse_while_statement(lexer):
     pass
 
 
-def parse_function(lexer):
+def parse_function_statement(lexer):
     pass
 
 
@@ -133,7 +161,7 @@ def parse_expression(lexer):
     while True:
         exp = parse_assignment_expression(lexer)
         if not exp:
-            raise UnexpectedTokenException(lexer.peek_token())
+            break
 
         exps.append(exp)
 
@@ -142,9 +170,9 @@ def parse_expression(lexer):
         else:
             break
 
-    assert(len(exps) > 0)
-
-    if len(exps) == 1:
+    if not exps:
+        return None
+    elif len(exps) == 1:
         return exps[0]
     else:
         exp = MultipleExpression()
@@ -155,29 +183,128 @@ def parse_expression(lexer):
 
 
 def parse_assignment_expression(lexer):
-    # currently can only start with left_hand_expression
-    left = parse_left_hand_expression(lexer)
-    if not left:
+    """
+    this function is design according to es5's grammar specification
+
+    the return value of this function can be AssignmentExpression, BinaryOperatorExpression, UnaryOperatorExpression,
+    LeftHandExpression
+    """
+    ret = parse_conditional_expression(lexer)
+
+    if not ret:
         return None
 
-    tok = lexer.next_token()
-    if tok.value not in ["=", "*=", "/=", "%=", "+=", "-=", "<<=", ">>=", ">>>=", "&=", "^=", "|="]:
-        raise UnexpectedTokenException(tok)
+    if ret != LeftHandExpression:
+        return ret
 
+    tok = lexer.peek_token()
+    if tok.value not in ["=", "*=", "/=", "%=", "+=", "-=", "<<=", ">>=", ">>>=", "&=", "^=", "|="]:
+        return ret
+
+    lexer.next_token()
     right = parse_assignment_expression(lexer)
 
-    return AssignmentExpression(left, right)
+    return AssignmentExpression(ret, tok, right)
+
+
+def parse_conditional_expression(lexer):
+    # currently only return binary expression
+    return parse_binary_expression(lexer)
+
+op_priority = (
+    ("||", ),
+    ("&&", ),
+    ("|", ),
+    ("^", ),
+    ("&", ),
+    ("==", "!=", "===", "!=="),
+    ("<", ">", "<=", ">="),  # TODO: instanceof
+    ("<<", ">>", ">>>"),
+    ("+", "-"),
+    ("*", "/", "%"))
+
+# convret the op priority
+_op_priority = {}
+for i in range(0, len(op_priority)):
+    for op in op_priority[i]:
+        _op_priority[op] = i
+
+
+def parse_binary_expression(lexer):
+    toks = []
+    exps = []
+
+    # pop up tokens from token stack and calculate binary expression
+    def _pop_tok(tok=None):
+        while toks and (not tok or (tok and _op_priority[tok.value] <= _op_priority[toks[-1].value])):
+            exp1 = exps.pop()
+            exp0 = exps.pop()
+
+            exps.append(BinaryExpression(exp0, toks.pop(), exp1))
+
+    # read up first expression
+    exp = parse_unary_expression(lexer)
+    if not exp:
+        return None
+    exps.append(exp)
+
+    # then should one token and one expression
+    while True:
+        tok = lexer.peek_token()
+
+        if (tok == ES5BinaryOperator and
+                tok.value not in ["=", "*=", "/=", "%=", "+=", "-=", "<<=", ">>=", ">>>=", "&=", "^=", "|="]):
+            _pop_tok(tok)
+            toks.append(lexer.next_token())
+
+            # should have a exp
+            exp = parse_unary_expression(lexer)
+            if not exp:
+                raise UnexpectedExpression(lexer.next_token())
+            exps.append(exp)
+        else:
+            break
+
+    # pop up left
+    _pop_tok()
+    return exps[0]
+
+
+def parse_unary_expression(lexer):
+    tok = lexer.peek_token()
+
+    # can only be +,-,~,!
+    if (tok == ES5UnaryOperator and tok.value in ["~", "!"]) or (tok == ES5BinaryOperator and tok.value in ["+", "-"]):
+        lexer.next_token()
+        exp = parse_unary_expression(lexer)
+
+        return UnaryExpression(tok, exp)
+    else:
+        return parse_postfix_expression(lexer)
+
+
+def parse_postfix_expression(lexer):
+    # can only be left-handside-expression
+    return parse_left_hand_expression(lexer)
 
 
 def parse_left_hand_expression(lexer):
-    # current left_hand_expression can only be call-expression, member-expression
-    # ignore new-expression
+    ret = parse_new_expression(lexer)
+    if ret:
+        return ret
+
     ret = parse_member_expression(lexer)
 
     if ret:
         return ret
 
+    return None
     # return parse_call_expression(lexer)
+
+
+def parse_new_expression(lexer):
+    # cannot be new
+    return parse_member_expression(lexer)
 
 
 def parse_primary_expression(lexer):
@@ -205,10 +332,14 @@ def parse_primary_expression(lexer):
 
 def parse_member_expression(lexer):
     # no new expression
+    # can only parse primary expression
     exp = parse_primary_expression(lexer)
     if exp:
         return exp
 
+    return None
+    """
+    print lexer.peek_token()
     # exp = parse_function_expression(lexer)
     # if exp:
     #    return exp
@@ -231,6 +362,7 @@ def parse_member_expression(lexer):
         return MemberExpression(exp, PrimaryExpression(name))
 
     raise UnexpectedTokenException(tok)
+    """
 
 
 # def parse_call_expression(lexer):
