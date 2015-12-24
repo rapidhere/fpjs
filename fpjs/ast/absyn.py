@@ -84,6 +84,45 @@ class BlockStatement(Statement):
             stat.ast_print(indent + 1)
 
 
+class ReturnStatement(Statement):
+    def __init__(self, tok, exp):
+        self.expression = exp
+        self.token = tok
+
+    def position(self):
+        return self.token.position
+
+    def ast_print(self, indent=0):
+        self._print(indent, "ReturnStatement:")
+        if self.expression:
+            self.expression.ast_print(indent + 1)
+        else:
+            self._print(indent + 1, "None")
+
+
+class IfStatement(Statement):
+    def __init__(self, if_tok, test_exp, true_stat, false_stat):
+        self.if_token = if_tok
+        self.test_expression = test_exp
+        self.true_statement = true_stat
+        self.false_statement = false_stat
+
+    def position(self):
+        return self.if_token.position
+
+    def ast_print(self, indent=0):
+        self._print(indent, "IfStatement:")
+        self._print(indent + 1, "Test:")
+        self.test_expression.ast_print(indent + 2)
+        self._print(indent + 1, "True:")
+        self.true_statement.ast_print(indent + 2)
+        self._print(indent + 1, "False:")
+        if self.false_statement:
+            self.false_statement.ast_print(indent + 2)
+        else:
+            self._print(indent + 2, "None")
+
+
 class VariableStatement(Statement):
     def __init__(self, var_token):
         self.var = var_token
@@ -156,6 +195,11 @@ class MultipleExpression(Expression):
 
     def position(self):
         self.expressions[0].position
+
+    def ast_print(self, indent=0):
+        self._print(indent, "MultipleExpression:")
+        for exp in self.expressions:
+            exp.ast_print(indent + 1)
 
 
 class AssignmentExpression(Expression):

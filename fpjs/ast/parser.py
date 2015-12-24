@@ -70,15 +70,32 @@ def parse_statement(lexer):
         lexer.next_token()
         return EmptyStatement(token)
     elif token == ES5If:
-        pass
+        lexer.next_token()
+
+        expect_next(lexer, ES5LeftParenthesis)
+        test_exp = parse_expression(lexer)
+        expect_next(lexer, ES5RightParenthesis)
+
+        true_stat = parse_statement(lexer)
+
+        else_tok = lexer.peek_token()
+        false_stat = None
+        if else_tok == ES5Else:
+            lexer.next_token()
+            false_stat = parse_statement(lexer)
+
+        return IfStatement(token, test_exp, true_stat, false_stat)
     elif token == ES5For:
         pass
     elif token == ES5While:
         pass
-    elif token == ES5Function:
-        return parse_function_statement(lexer, token)
     elif token == ES5Return:
-        pass
+        # TODO: there should be no \n here, not checked
+        lexer.next_token()
+        exp = parse_expression(lexer)
+        expect_next(lexer, ES5SemiColon)
+
+        return ReturnStatement(token, exp)
     elif token == ES5LeftBrace:
         r = BlockStatement()
         lexer.next_token()
@@ -139,19 +156,11 @@ def parse_var_statement(lexer):
     return stat
 
 
-def parse_if_statement(lexer):
-    pass
-
-
 def parse_for_statement(lexer):
     pass
 
 
 def parse_while_statement(lexer):
-    pass
-
-
-def parse_function_statement(lexer):
     pass
 
 

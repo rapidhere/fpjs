@@ -202,6 +202,7 @@ class ES5Id(ES5Token):
 
 
 _lex_cls_order = (
+    ES5Return,
     ES5Var,
     ES5New,
     ES5Function,
