@@ -156,6 +156,40 @@ class ExpressionStatement(Statement):
         self.expression.ast_print(indent + 1)
 
 
+class WhileStatement(Statement):
+    def __init__(self, tok, test_exp, body_stat):
+        self.token = tok
+        self.test_expression = test_exp
+        self.body_statement = body_stat
+
+    def position(self):
+        return self.token.position
+
+    def ast_print(self, indent=0):
+        self._print(indent, "WhileStatement:")
+        self._print(indent + 1, "Test:")
+        self.test_expression.ast_print(indent + 2)
+        self._print(indent + 1, "Body:")
+        self.body_statement.ast_print(indent + 2)
+
+
+class DoWhileStatement(Statement):
+    def __init__(self, tok, test_exp, body_stat):
+        self.token = tok
+        self.test_expression = test_exp
+        self.body_statement = body_stat
+
+    def position(self):
+        return self.token.position
+
+    def ast_print(self, indent=0):
+        self._print(indent, "DoWhileStatement:")
+        self._print(indent + 1, "Body:")
+        self.body_statement.ast_print(indent + 2)
+        self._print(indent + 1, "Test:")
+        self.test_expression.ast_print(indent + 2)
+
+
 class EmptyStatement(Statement):
     def __init__(self, semicolon):
         self.semicolon = semicolon

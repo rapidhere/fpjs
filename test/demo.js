@@ -16,3 +16,13 @@ return a + b + c * (d - 4);
 return ;
 
 if (1, 2, 3) a = 1;
+
+while(true) {
+  a += 1;
+  b -= 2;
+
+  do {
+    c + 2;
+    d - 3;
+  } while(a, b, c, d);
+}

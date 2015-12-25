@@ -115,12 +115,6 @@ class ES5Lexer(object):
         """
         return self.peek_token() is not None
 
-    def back_token(self, tok):
-        """
-        push a token back into content flow
-        """
-        self._stored_tokens.append(tok)
-
     def peek_token(self):
         """
         get a token, without remove it from content
