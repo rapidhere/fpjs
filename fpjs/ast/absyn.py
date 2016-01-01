@@ -50,7 +50,7 @@ class Statement(ES5AbstractSyntax):
     pass
 
 
-class MultipleStatement(ES5AbstractSyntax):
+class Program(ES5AbstractSyntax):
     def __init__(self):
         self.statments = []
 

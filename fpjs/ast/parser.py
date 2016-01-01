@@ -50,8 +50,8 @@ def is_literal(tok):
         tok == ES5String)
 
 
-def parse_programm(lexer):
-    prog = MultipleStatement()
+def parse_program(lexer):
+    prog = Program()
     while lexer.has_next():
         ret = parse_statement(lexer)
         if not ret:
@@ -431,4 +431,4 @@ class ES5Parser(object):
 
         raise LexicalException, SyntaxExecption on error
         """
-        return parse_programm(self.lexer)
+        return parse_program(self.lexer)
