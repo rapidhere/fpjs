@@ -171,7 +171,29 @@ def parse_var_statement(lexer):
 
 
 def parse_for_statement(lexer):
-    pass
+    # var in statement is not supported currently
+    # var declartion in for is no supported
+    for_tok = expect_next(lexer, ES5For)
+    init_exp = None
+    test_exp = None
+    inc_exp = None
+
+    expect_next(lexer, ES5LeftParenthesis)
+    if lexer.peek_token() != ES5SemiColon:
+        init_exp = parse_expression(lexer)
+    expect_next(lexer, ES5SemiColon)
+
+    if lexer.peek_token() != ES5SemiColon:
+        test_exp = parse_expression(lexer)
+    expect_next(lexer, ES5SemiColon)
+
+    if lexer.peek_token() != ES5RightParenthesis:
+        inc_exp = parse_expression(lexer)
+    expect_next(lexer, ES5RightParenthesis)
+
+    body_stat = parse_statement(lexer)
+
+    return ForStatement(for_tok, init_exp, test_exp, inc_exp, body_stat)
 
 
 def parse_expression(lexer):

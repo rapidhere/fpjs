@@ -190,6 +190,42 @@ class DoWhileStatement(Statement):
         self.test_expression.ast_print(indent + 2)
 
 
+class ForStatement(Statement):
+    def __init__(self, tok, init_exp, test_exp, inc_exp, body_stat):
+        self.token = tok
+        self.init_expression = init_exp
+        self.test_expression = test_exp
+        self.increment_expression = inc_exp
+        self.body_statement = body_stat
+
+    def position(self):
+        return self.token.position
+
+    def ast_print(self, indent=0):
+        self._print(indent, "ForStatement:")
+
+        self._print(indent + 1, "Init:")
+        if self.init_expression:
+            self.init_expression.ast_print(indent + 2)
+        else:
+            self._print(indent + 2, "None")
+
+        self._print(indent + 1, "Test:")
+        if self.test_expression:
+            self.test_expression.ast_print(indent + 2)
+        else:
+            self._print(indent + 2, "None")
+
+        self._print(indent + 1, "Increment:")
+        if self.increment_expression:
+            self.increment_expression.ast_print(indent + 2)
+        else:
+            self._print(indent + 2, "None")
+
+        self._print(indent + 1, "Body:")
+        self.body_statement.ast_print(indent + 2)
+
+
 class EmptyStatement(Statement):
     def __init__(self, semicolon):
         self.semicolon = semicolon
