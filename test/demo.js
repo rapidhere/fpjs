@@ -7,7 +7,7 @@ for(;i < 20;) {
 }
 
 for(;;) {
-  
+
 }
 
 if (a == 3) {
@@ -37,4 +37,9 @@ while(true) {
     c + 2;
     d - 3;
   } while(a, b, c, d);
+}
+
+function func(a, b, c) {
+  a = 1; b = 3;
+  return a - b + 3;
 }

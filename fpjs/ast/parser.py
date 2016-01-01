@@ -66,6 +66,28 @@ def parse_statement(lexer):
 
     if token == ES5Var:
         return parse_var_statement(lexer)
+    elif token == ES5Function:
+        lexer.next_token()
+
+        if lexer.peek_token() == ES5LeftParenthesis:
+            lexer.back_token(token)
+
+            # anonymous function is function expression
+            # not a statement
+            return parse_expression_statement(lexer)
+
+        func_id = expect_next(lexer, ES5Id)
+
+        expect_next(lexer, ES5LeftParenthesis)
+        args = parse_argument_list(lexer)
+        expect_next(lexer, ES5RightParenthesis)
+
+        # must be block statment
+        expect_token(lexer.peek_token(), ES5LeftBrace)
+        body = parse_statement(lexer)
+        assert body == BlockStatement
+
+        return FunctionStatement(token, func_id, args, body)
     elif token == ES5SemiColon:
         lexer.next_token()
         return EmptyStatement(token)
@@ -126,6 +148,23 @@ def parse_statement(lexer):
         return r
     else:
         return parse_expression_statement(lexer)
+
+
+def parse_argument_list(lexer):
+    ret = ArgumentList()
+
+    if lexer.peek_token() != ES5Id:
+        return ret
+
+    while True:
+        ret.append_argument(expect_next(lexer, ES5Id))
+
+        if lexer.peek_token() == ES5Comma:
+            lexer.next_token()
+        else:
+            break
+
+    return ret
 
 
 def parse_expression_statement(lexer):

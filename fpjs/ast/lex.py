@@ -109,6 +109,12 @@ class ES5Lexer(object):
 
         self.content = self.content[1:]
 
+    def back_token(self, token):
+        """
+        back a token to the queue
+        """
+        self._stored_tokens = [token] + self._stored_tokens
+
     def has_next(self):
         """
         if has left token to parse

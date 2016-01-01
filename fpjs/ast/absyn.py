@@ -84,6 +84,43 @@ class BlockStatement(Statement):
             stat.ast_print(indent + 1)
 
 
+class FunctionStatement(Statement):
+    def __init__(self, tok, id, args, body):
+        self.token = tok
+        self.id = id
+        self.arguments = args
+        self.body_statement = body
+
+    def position(self):
+        return self.token.position
+
+    def ast_print(self, indent=0):
+        self._print(indent, "FunctionStatement:")
+        self._print(indent + 1, self.id)
+        self.arguments.ast_print(indent + 1)
+        self._print(indent + 1, "Body:")
+        self.body_statement.ast_print(indent + 2)
+
+
+class ArgumentList(ES5AbstractSyntax):
+    def __init__(self):
+        self.arguments = []
+
+    def __iter__(self):
+        return iter(self.arguments)
+
+    def append_argument(self, arg):
+        self.arguments.append(arg)
+
+    def position(self):
+        return self.arguments[0].position
+
+    def ast_print(self, indent=0):
+        self._print(indent, "Arguments:")
+        for arg in self.arguments:
+            self._print(indent + 1, arg)
+
+
 class ReturnStatement(Statement):
     def __init__(self, tok, exp):
         self.expression = exp
