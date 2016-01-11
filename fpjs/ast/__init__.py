@@ -1,4 +1,4 @@
-# -*-codiing: utf-8 -*-
+# -*-coding: utf-8 -*-
 """
 Copyright (c) 2015 by rapidhere, RANTTU. INC. All Rights Reserved.
 
