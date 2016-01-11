@@ -74,7 +74,11 @@ def parse_statement(lexer):
 
             # anonymous function is function expression
             # not a statement
-            return parse_expression_statement(lexer)
+            exp = parse_function_expression(lexer)
+            if not exp:
+                return None
+
+            return ExpressionStatement(exp)
 
         func_id = expect_next(lexer, ES5Id)
 
@@ -417,13 +421,12 @@ def parse_member_expression(lexer):
     if exp:
         return exp
 
-    return None
-    """
-    print lexer.peek_token()
-    # exp = parse_function_expression(lexer)
-    # if exp:
-    #    return exp
+    if lexer.peek_token() == ES5Function:
+        return parse_function_expression(lexer)
 
+    return None
+
+    """
     exp = parse_member_expression(lexer)
     if not exp:
         return None
@@ -447,11 +450,21 @@ def parse_member_expression(lexer):
 
 # def parse_call_expression(lexer):
     # current only can be function(arguments)
-#    pass
 
+def parse_function_expression(lexer):
+    # currently function expression can only be anonymous function
+    tok = expect_next(lexer, ES5Function)
+    expect_next(lexer, ES5LeftParenthesis)
+    args = parse_argument_list(lexer)
+    expect_next(lexer, ES5RightParenthesis)
 
-# def parse_function_expression(lexer):
-#    pass
+    # must be block statment
+    expect_token(lexer.peek_token(), ES5LeftBrace)
+    body = parse_statement(lexer)
+    assert body == BlockStatement
+
+    # id always been none
+    return FunctionExpression(tok, None, args, body)
 
 
 class ES5Parser(object):

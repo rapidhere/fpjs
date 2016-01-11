@@ -43,3 +43,7 @@ function func(a, b, c) {
   a = 1; b = 3;
   return a - b + 3;
 }
+
+function (a, d) {
+  return a + d / 10 % 3;
+}

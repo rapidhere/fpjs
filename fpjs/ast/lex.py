@@ -128,7 +128,7 @@ class ES5Lexer(object):
         if not self._stored_tokens:
             self._stored_tokens.append(self._next_token())
 
-        return self._stored_tokens[-1]
+        return self._stored_tokens[0]
 
     def next_token(self):
         """
@@ -137,7 +137,7 @@ class ES5Lexer(object):
         if not self._stored_tokens:
             self._stored_tokens.append(self._next_token())
 
-        return self._stored_tokens.pop()
+        return self._stored_tokens.pop(0)
 
     def _next_token(self):
         """

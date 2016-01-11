@@ -364,6 +364,25 @@ class CallExpression(LeftHandExpression):
     pass
 
 
+class FunctionExpression(LeftHandExpression):
+    def __init__(self, token, id, args, body):
+        # current id always None
+        self.token = token
+        self.id = id
+        self.arguments = args
+        self.body_statement = body
+
+    def position(self):
+        return self.token.position
+
+    def ast_print(self, indent=0):
+        self._print(indent, "FunctionExpression:")
+        self._print(indent + 1, self.id)
+        self.arguments.ast_print(indent + 1)
+        self._print(indent + 1, "Body:")
+        self.body_statement.ast_print(indent + 2)
+
+
 class PrimaryExpression(MemberExpression):
     def __init__(self, value):
         self.value = value
