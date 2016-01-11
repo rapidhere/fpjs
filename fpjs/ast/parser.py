@@ -83,7 +83,7 @@ def parse_statement(lexer):
         func_id = expect_next(lexer, ES5Id)
 
         expect_next(lexer, ES5LeftParenthesis)
-        args = parse_argument_list(lexer)
+        pars = parse_formal_parameter_list(lexer)
         expect_next(lexer, ES5RightParenthesis)
 
         # must be block statment
@@ -91,7 +91,7 @@ def parse_statement(lexer):
         body = parse_statement(lexer)
         assert body == BlockStatement
 
-        return FunctionStatement(token, func_id, args, body)
+        return FunctionStatement(token, func_id, pars, body)
     elif token == ES5SemiColon:
         lexer.next_token()
         return EmptyStatement(token)
@@ -154,17 +154,38 @@ def parse_statement(lexer):
         return parse_expression_statement(lexer)
 
 
-def parse_argument_list(lexer):
-    ret = ArgumentList()
+def parse_formal_parameter_list(lexer):
+    ret = FormalParameterList()
 
     if lexer.peek_token() != ES5Id:
         return ret
 
     while True:
-        ret.append_argument(expect_next(lexer, ES5Id))
+        ret.append_parameter(expect_next(lexer, ES5Id))
 
         if lexer.peek_token() == ES5Comma:
             lexer.next_token()
+        else:
+            break
+
+    return ret
+
+
+def parse_argument_list(lexer):
+    ret = ArgumentList()
+
+    exp = parse_assignment_expression(lexer)
+    if not exp:
+        return ret
+
+    while True:
+        ret.append_argument(exp)
+
+        if lexer.peek_token() == ES5Comma:
+            lexer.next_token()
+            exp = parse_assignment_expression(lexer)
+            if not exp:
+                raise UnexpectedTokenException(lexer.next_token())
         else:
             break
 
@@ -373,17 +394,37 @@ def parse_postfix_expression(lexer):
 
 
 def parse_left_hand_expression(lexer):
-    ret = parse_new_expression(lexer)
-    if ret:
-        return ret
+    exp = parse_new_expression(lexer)
+    if exp != MemberExpression or lexer.peek_token() != ES5LeftParenthesis:
+        return exp
 
-    ret = parse_member_expression(lexer)
+    expect_next(lexer, ES5LeftParenthesis)
+    args = parse_argument_list(lexer)
+    expect_next(lexer, ES5RightParenthesis)
 
-    if ret:
-        return ret
+    exp = CallExpression(exp, args)
 
-    return None
-    # return parse_call_expression(lexer)
+    while True:
+        tok = lexer.peek_token()
+
+        if tok == ES5LeftParenthesis:
+            lexer.next_token()
+            args = parse_argument_list(lexer)
+            expect_next(lexer, ES5RightParenthesis)
+            exp = CallExpression(exp, args)
+        elif tok == ES5LeftBracket:
+            lexer.next_token()
+            idexp = parse_expression(lexer)
+            expect_next(lexer, ES5RightBracket)
+            exp = MemberExpression(exp, idexp)
+        elif tok == ES5Dot:
+            lexer.next_token()
+            idtok = expect_next(lexer, ES5Id)
+            exp = MemberExpression(exp, idtok)
+        else:
+            break
+
+    return exp
 
 
 def parse_new_expression(lexer):
@@ -418,44 +459,35 @@ def parse_member_expression(lexer):
     # no new expression
     # can only parse primary expression
     exp = parse_primary_expression(lexer)
-    if exp:
-        return exp
+    if not exp and lexer.peek_token() == ES5Function:
+        exp = parse_function_expression(lexer)
 
-    if lexer.peek_token() == ES5Function:
-        return parse_function_expression(lexer)
-
-    return None
-
-    """
-    exp = parse_member_expression(lexer)
     if not exp:
         return None
 
-    tok = lexer.next_token()
-    if tok == ES5LeftBracket:
-        idx_exp = parse_expression(lexer)
-        if not idx_exp:
-            raise UnexpectedTokenException(lexer.peek_token())
-        expect_next(lexer, ES5RightBracket)
+    while True:
+        tok = lexer.peek_token()
 
-        return MemberExpression(exp, idx_exp)
-    elif tok == ES5Dot:
-        name = expect_next(lexer, ES5Id)
+        if tok == ES5LeftBracket:
+            lexer.next_token()
+            idexp = parse_expression(lexer)
+            expect_next(lexer, ES5RightBracket)
+            exp = MemberExpression(exp, idexp)
+        elif tok == ES5Dot:
+            lexer.next_token()
+            idtok = expect_next(lexer, ES5Id)
+            exp = MemberExpression(exp, idtok)
+        else:
+            break
 
-        return MemberExpression(exp, PrimaryExpression(name))
+    return exp
 
-    raise UnexpectedTokenException(tok)
-    """
-
-
-# def parse_call_expression(lexer):
-    # current only can be function(arguments)
 
 def parse_function_expression(lexer):
     # currently function expression can only be anonymous function
     tok = expect_next(lexer, ES5Function)
     expect_next(lexer, ES5LeftParenthesis)
-    args = parse_argument_list(lexer)
+    pars = parse_formal_parameter_list(lexer)
     expect_next(lexer, ES5RightParenthesis)
 
     # must be block statment
@@ -464,7 +496,7 @@ def parse_function_expression(lexer):
     assert body == BlockStatement
 
     # id always been none
-    return FunctionExpression(tok, None, args, body)
+    return FunctionExpression(tok, None, pars, body)
 
 
 class ES5Parser(object):

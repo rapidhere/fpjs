@@ -47,3 +47,7 @@ function func(a, b, c) {
 function (a, d) {
   return a + d / 10 % 3;
 }
+
+f()[a].b["afasfdsa"](1, 2, 3);
+
+a.b["af-erfafs" + 2].d.e;

@@ -102,6 +102,25 @@ class FunctionStatement(Statement):
         self.body_statement.ast_print(indent + 2)
 
 
+class FormalParameterList(ES5AbstractSyntax):
+    def __init__(self):
+        self.parameters = []
+
+    def __iter__(self):
+        return iter(self.parameters)
+
+    def append_parameter(self, arg):
+        self.parameters.append(arg)
+
+    def position(self):
+        return self.parameters[0].position
+
+    def ast_print(self, indent=0):
+        self._print(indent, "Parameters:")
+        for par in self.parameters:
+            self._print(indent + 1, par)
+
+
 class ArgumentList(ES5AbstractSyntax):
     def __init__(self):
         self.arguments = []
@@ -118,7 +137,7 @@ class ArgumentList(ES5AbstractSyntax):
     def ast_print(self, indent=0):
         self._print(indent, "Arguments:")
         for arg in self.arguments:
-            self._print(indent + 1, arg)
+            arg.ast_print(indent + 1)
 
 
 class ReturnStatement(Statement):
@@ -352,19 +371,39 @@ class LeftHandExpression(Expression):
 
 
 class MemberExpression(LeftHandExpression):
-    def __init__(self, group, member):
+    def __init__(self, group, identifier):
         self.group = group
-        self.member = member
+        self.identifier = identifier
 
     def position(self):
         return self.group.position
 
+    def ast_print(self, indent=0):
+        self._print(indent, "MemberExpression:")
+        self.group.ast_print(indent + 1)
+        self._print(indent + 1, "identifer:")
+        if self.identifier == Expression:
+            self.identifier.ast_print(indent + 2)
+        else:
+            self._print(indent + 2, self.identifier)
+
 
 class CallExpression(LeftHandExpression):
-    pass
+    def __init__(self, callee, args):
+        self.callee = callee
+        self.arguments = args
+
+    def position(self):
+        return self.callee.position
+
+    def ast_print(self, indent=0):
+        self._print(indent, "CallExpression:")
+        self._print(indent + 1, "Callee")
+        self.callee.ast_print(indent + 2)
+        self.arguments.ast_print(indent + 1)
 
 
-class FunctionExpression(LeftHandExpression):
+class FunctionExpression(MemberExpression):
     def __init__(self, token, id, args, body):
         # current id always None
         self.token = token
