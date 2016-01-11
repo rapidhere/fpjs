@@ -51,3 +51,9 @@ function (a, d) {
 f()[a].b["afasfdsa"](1, 2, 3);
 
 a.b["af-erfafs" + 2].d.e;
+
+1.3;
+0x123;
+0123;
+
+1..toString();

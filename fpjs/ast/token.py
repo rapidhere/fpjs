@@ -190,7 +190,7 @@ class ES5BinaryOperator(ES5Token):
 
 
 class ES5Number(ES5Token):
-    pattern = re.compile(r"(?:0[x|X])?\d+" + boundary)
+    pattern = re.compile(r"(?:\d+\.\d*)|0\d+|0x\d+|0X\d+|\d+" + boundary)
 
 
 class ES5String(ES5Token):
