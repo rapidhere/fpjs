@@ -309,6 +309,9 @@ def parse_assignment_expression(lexer):
     lexer.next_token()
     right = parse_assignment_expression(lexer)
 
+    if not right:
+        raise UnexpectedTokenException(lexer.next_token())
+
     return AssignmentExpression(ret, tok, right)
 
 
@@ -365,7 +368,7 @@ def parse_binary_expression(lexer):
             # should have a exp
             exp = parse_unary_expression(lexer)
             if not exp:
-                raise UnexpectedExpression(lexer.next_token())
+                raise UnexpectedTokenException(lexer.next_token())
             exps.append(exp)
         else:
             break

@@ -22,21 +22,11 @@ some parser helpers
 """
 
 __author__ = "rapidhere"
-__all__ = ["expect_token", "expect_next", "expect_absyn"]
+__all__ = ["expect_token", "expect_next"]
 
-from fpjs.exception import UnexpectedTokenException, UnexpectedExpression, UnexpectEOF
+from fpjs.exception import UnexpectedTokenException, UnexpectEOF
 from token import *
 from absyn import *
-
-
-def expect_absyn(absyn, absyn_cls):
-    """
-    except the abstract syntax tree component to have exact class
-    """
-    if absyn != absyn_cls:
-        raise UnexpectedExpression(absyn)
-
-    return absyn
 
 
 def expect_token(token, token_cls, token_val=None):
