@@ -1,4 +1,4 @@
-HOW TO MAKE YOUR JS CODE HORRIBLE
+JUST A JS AST
 ===
 
 > Author: rapidhere@gmail.com
@@ -6,13 +6,9 @@ HOW TO MAKE YOUR JS CODE HORRIBLE
 > Maintainer: rapidhere@gmail.com
 >
 
-this project will try to make your fancy javascript code:
+the original way failed.
 
-* fxxcking hard to read
-* running slow
-* easy to crash
-
-i.e. functional-programming javascript without semicolons and braces
+i'll try this some day
 
 LICENSE
 ---
