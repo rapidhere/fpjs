@@ -6,9 +6,53 @@ JUST A JS AST
 > Maintainer: rapidhere@gmail.com
 >
 
-the original way failed.
+convert your javascript code into functional-programming way
 
-i'll try this some day
+
+HOW TO
+---
+
+### Loop And Recursion
+
+Loop can be convert into Recursion.
+
+So the left problem is how to implement Recursions in functional-programming way. This is the most hard problem I have to solve. The answer is
+to use [Y-combinator](https://en.wikipedia.org/wiki/Fixed-point_combinator)
+
+In detail, first we have a recursion function like `fraction`:
+```
+var frac = function(n) {
+  if(n === 0)
+    return 1;
+  return frac(n - 1) * n;
+};
+```
+
+And we have the Y-combinator:
+```
+Y = function(F) {
+  return (function(G) {
+    return G(G);
+  })(function(self) {
+    F(function() {
+      self(self).apply(this, arguments);
+    });
+  });
+};
+```
+
+Then, we have to wrap the function `frac` to use Y-combinator:
+```
+var frac = Y(function(frac) {
+  return function(n) {
+    if(n == 0)
+      return 1;
+    return frac(n - 1) * n
+  };
+});
+```
+
+then we get the recursion function `frac`
 
 LICENSE
 ---
