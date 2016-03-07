@@ -40,6 +40,10 @@ Y = function(F) {
   });
 };
 ```
+Rewrite with ES6(require `--harmony_rest_parameters` when run with node):
+```
+var Y = (F)=>((G)=>G(G))((self)=>F((...args) => self(self).apply(this, args)));
+```
 
 Then, we have to wrap the function `frac` to use Y-combinator:
 ```
