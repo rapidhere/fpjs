@@ -57,6 +57,9 @@ var frac = Y(function(frac) {
 ```
 
 then we get the recursion function `frac`
+```
+frac(10); // return 3628800
+```
 
 LICENSE
 ---
