@@ -49,7 +49,7 @@ Then, we have to wrap the function `fact` to use Y-combinator:
 ```
 var fact = Y(function(fact) {
   return function(n) {
-    if(n == 0)
+    if(n === 0)
       return 1;
     return fact(n - 1) * n;
   };
