@@ -103,7 +103,7 @@ def load_all(**kwargs):
     return ts
 
 
-if __name__ == "__main__":
+def _main():
     parser = argparse.ArgumentParser(
         prog="fpjs js fragment tester",
         description="test converter",
@@ -136,4 +136,13 @@ if __name__ == "__main__":
         ts.addTest(JSFragmentTestCase.load_fragment(args.fragment, **opt))
 
     tr = unittest.TextTestRunner()
-    tr.run(ts)
+    ret = tr.run(ts)
+
+    if ret.wasSuccessful():
+        exit(0)
+    else:
+        exit(1)
+
+
+if __name__ == "__main__":
+    _main()
