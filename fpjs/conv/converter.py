@@ -49,7 +49,7 @@ def convert_statement(stat):
     if stat == ExpressionStatement:
         return convert_expression(stat.expression)
 
-    raise NotImplemented("unsupported ast yet: " + stat.__class__.__name__)
+    raise NotImplementedError("unsupported ast yet: " + stat.__class__.__name__)
 
 
 def convert_expression(exp):
@@ -57,8 +57,10 @@ def convert_expression(exp):
         return convert_call_expression(exp)
     elif exp == PrimaryExpression:
         return convert_primary_expression(exp)
+    elif exp == BinaryExpression:
+        return convert_binary_expression(exp)
 
-    raise NotImplemented("unsupported ast yet: " + exp.__class__.__name__)
+    raise NotImplementedError("unsupported ast yet: " + exp.__class__.__name__)
 
 
 def convert_call_expression(exp):
@@ -69,13 +71,17 @@ def convert_call_expression(exp):
     return ret
 
 
+def convert_binary_expression(exp):
+    pass
+
+
 def convert_member_expression(exp):
     ret = convert_expression(exp.group)
 
     if exp.identifier == ES5Id:
         ret += "." + convert_token(exp.identifier)
     else:
-        raise NotImplemented("unsupported identifier for member expression: " + str(exp.identifier))
+        raise NotImplementedError("unsupported identifier for member expression: " + str(exp.identifier))
 
     return ret
 
@@ -99,7 +105,7 @@ def convert_token(tok):
     elif tok == ES5String:
         return '"%s"' % tok.value
 
-    raise NotImplemented("unsupported token yet: " + tok.__class__.__name__)
+    raise NotImplementedError("unsupported token yet: " + tok.__class__.__name__)
 
 
 class Converter(object):
