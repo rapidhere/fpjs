@@ -1,6 +1,8 @@
 JUST A JS AST
 ===
 
+![](https://travis-ci.org/rapidhere/fpjs.svg?branch=master)
+
 > Author: rapidhere@gmail.com
 >
 > Maintainer: rapidhere@gmail.com
