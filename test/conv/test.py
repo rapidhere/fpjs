@@ -40,11 +40,12 @@ class JSFragmentTestCase(unittest.TestCase):
     """
     custom fragment test case
     """
-    def __init__(self, fragment_name, print_ast=False, print_conv=False, *args, **kwargs):
+    def __init__(self, fragment_name, print_ast=False, print_conv=False, print_result=False, *args, **kwargs):
         super(JSFragmentTestCase, self).__init__(*args, **kwargs)
         self.fragment_name = fragment_name
         self.print_ast = print_ast
         self.print_conv = print_conv
+        self.print_result = print_result
 
         if not os.path.isfile(self.fragment_path):
             raise ValueError("no such fragment: " + self.fragment_name)
@@ -59,7 +60,8 @@ class JSFragmentTestCase(unittest.TestCase):
 
     @classmethod
     def load_fragment(cls, fragment_name, **kwargs):
-        return cls(fragment_name, "test_fragment", **kwargs)
+        kwargs["methodName"] = "test_fragment"
+        return cls(fragment_name, **kwargs)
 
     def fail(self, msg):
         super(JSFragmentTestCase, self).fail("\n[FRAG: " + self.fragment_name + "] " + msg)
@@ -68,15 +70,24 @@ class JSFragmentTestCase(unittest.TestCase):
         with open(self.fragment_path) as f:
             raw_content = f.read()
 
-            conv = Converter(self.print_ast, self.print_conv)
+            conv = Converter()
             conv.load(raw_content)
-            content = conv.convert()
+            content = conv.convert(self.print_ast, self.print_conv)
 
             try:
                 raw_ret = self._run(raw_content)
                 ret = self._run(content)
             except Exception as e:
                 self.fail("should not raise exceptions when run fragment: " + e.message)
+
+            if self.print_result:
+                print "=" * 20
+                print "raw:"
+                print raw_ret
+                print "=" * 20
+                print "conv:"
+                print ret
+                print "=" * 20
 
             if raw_ret != ret:
                 self.fail("fragment result not same:\nraw:\n%s \n==========\nconv:\n %s" % (raw_ret, ret))
@@ -102,9 +113,11 @@ if __name__ == "__main__":
         "-v", "--version", action="version",
         help="print the version and exit",
         version="fpjs js fragment tester v0.1")
-    parser.add_argument("--print-ast", help="print ast when print", action="store_true", default=False)
+    parser.add_argument("--print-ast", help="print ast when tst", action="store_true", default=False)
     parser.add_argument(
-        "--print-conv", help="print converted result when print", action="store_true", default=False)
+        "--print-conv", help="print converted result when test", action="store_true", default=False)
+    parser.add_argument(
+        "--print-result", help="print outputs when test", action="store_true", default=False)
 
     parser.add_argument("fragment", type=str, help="the fragment to test", default="all")
 
@@ -114,7 +127,8 @@ if __name__ == "__main__":
 
     opt = {
         "print_ast": args.print_ast,
-        "print_conv": args.print_conv}
+        "print_conv": args.print_conv,
+        "print_result": args.print_result}
 
     if args.fragment == "all":
         ts.addTest(load_all(**opt))
