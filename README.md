@@ -19,18 +19,18 @@ Loop can be convert into Recursion.
 So the left problem is how to implement Recursions in functional-programming way. This is the most hard problem I have to solve. The answer is
 to use [Y-combinator](https://en.wikipedia.org/wiki/Fixed-point_combinator)
 
-In detail, first we have a recursion function like `fraction`:
+In detail, first we have a recursion function like `factorial`:
 ```
-var frac = function(n) {
+var fact = function(n) {
   if(n === 0)
     return 1;
-  return frac(n - 1) * n;
+  return fact(n - 1) * n;
 };
 ```
 
 And we have the Y-combinator:
 ```
-Y = function(F) {
+var Y = function(F) {
   return (function(G) {
     return G(G);
   })(function(self) {
@@ -42,23 +42,23 @@ Y = function(F) {
 ```
 Rewrite with ES6(require `--harmony_rest_parameters` when run with node):
 ```
-var Y = (F)=>((G)=>G(G))((self)=>F((...args) => self(self).apply(this, args)));
+var Y = (F)=>((G)=>G(G))((self)=>F((...args)=>self(self).apply(this, args)));
 ```
 
-Then, we have to wrap the function `frac` to use Y-combinator:
+Then, we have to wrap the function `fact` to use Y-combinator:
 ```
-var frac = Y(function(frac) {
+var fact = Y(function(fact) {
   return function(n) {
     if(n == 0)
       return 1;
-    return frac(n - 1) * n
+    return fact(n - 1) * n;
   };
 });
 ```
 
-then we get the recursion function `frac`
+then we get the recursion function `fact`
 ```
-frac(10); // return 3628800
+fact(10); // return 3628800
 ```
 
 LICENSE
