@@ -18,10 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 predefined licenses headers
 ref from http://opensource.org
 
-a horrible javascript code converter
+horrible converter module
 """
 
 __author__ = "rapidhere"
-
-# flake8: noqa
-from conv.converter import Converter

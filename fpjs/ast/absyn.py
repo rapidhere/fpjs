@@ -61,7 +61,7 @@ class Program(ES5AbstractSyntax):
         return iter(self.statments)
 
     def ast_print(self, indent=0):
-        self._print(indent, "MultipleStatement:")
+        self._print(indent, "Program:")
 
         for stat in self.statments:
             stat.ast_print(indent + 1)

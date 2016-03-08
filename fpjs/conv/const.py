@@ -18,10 +18,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 predefined licenses headers
 ref from http://opensource.org
 
-a horrible javascript code converter
+some constants
 """
 
 __author__ = "rapidhere"
 
-# flake8: noqa
-from conv.converter import Converter
+
+class CODE_FRAGMENT:
+    Y_COMBINATOR = r"(F)=>((G)=>G(G))((self)=>F((...args)=>self(self).apply(this, args)))"
+
+    RUNNER_WRAP_BEGIN = r"((Y)=>"
+    RUNNER_WRAP_END = r")(%s);" % Y_COMBINATOR
