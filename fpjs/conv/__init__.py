@@ -22,3 +22,5 @@ horrible converter module
 """
 
 __author__ = "rapidhere"
+
+from converter import Converter
