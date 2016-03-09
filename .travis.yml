@@ -5,4 +5,4 @@ script:
   - nvm install 5
   - node --version
   - python ./test/conv/test.py all
-sudo: false
+sudo: required
