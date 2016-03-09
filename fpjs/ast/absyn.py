@@ -365,6 +365,14 @@ class UnaryExpression(Expression):
         self.operator = op
         self.expression = exp
 
+    def position(self):
+        return self.operator.position
+
+    def ast_print(self, indent=0):
+        self._print(indent, "UnaryExpression")
+        self._print(indent + 1, self.operator)
+        self.expression.ast_print(indent + 1)
+
 
 class LeftHandExpression(Expression):
     pass

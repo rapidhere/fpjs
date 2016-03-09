@@ -59,6 +59,8 @@ def convert_expression(exp):
         return convert_primary_expression(exp)
     elif exp == BinaryExpression:
         return convert_binary_expression(exp)
+    elif exp == UnaryExpression:
+        return convert_unary_expression(exp)
 
     raise NotImplementedError("unsupported ast yet: " + exp.__class__.__name__)
 
@@ -72,7 +74,15 @@ def convert_call_expression(exp):
 
 
 def convert_binary_expression(exp):
-    pass
+    ret = "(%s)" % convert_expression(exp.left)
+    ret += convert_token(exp.operator)
+    ret += "(%s)" % convert_expression(exp.right)
+
+    return ret
+
+
+def convert_unary_expression(exp):
+    return "%s(%s)" % (convert_token(exp.operator), convert_expression(exp.expression))
 
 
 def convert_member_expression(exp):
@@ -100,12 +110,10 @@ def convert_args(args):
 
 
 def convert_token(tok):
-    if tok == ES5Id:
-        return tok.value
-    elif tok == ES5String:
+    if tok == ES5String:
         return '"%s"' % tok.value
 
-    raise NotImplementedError("unsupported token yet: " + tok.__class__.__name__)
+    return tok.value
 
 
 class Converter(object):
