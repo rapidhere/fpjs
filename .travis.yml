@@ -1,5 +1,8 @@
-language: node_js
+language: python
 node_js:
-  - "5"
-script: python ./test/conv/test.py all
-sudo: required
+  - "2.7"
+script:
+  - nvm install 5
+  - node --version
+  - python ./test/conv/test.py all
+sudo: false
