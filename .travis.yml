@@ -1,4 +1,4 @@
-language: python
-python:
-  - "2.7"
+language: node_js
+node_js:
+  - "5"
 script: python ./test/conv/test.py all
