@@ -90,7 +90,7 @@ class JSFragmentTestCase(unittest.TestCase):
                 print "=" * 20
 
             if raw_ret != ret:
-                self.fail("fragment result not same:\nraw:\n%s \n==========\nconv:\n %s" % (raw_ret, ret))
+                self.fail("fragment result not same:\nraw:\n%s \n==========\nconv:\n%s" % (raw_ret, ret))
 
 
 def load_all(**kwargs):

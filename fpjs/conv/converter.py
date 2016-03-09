@@ -61,6 +61,8 @@ def convert_expression(exp):
         return convert_binary_expression(exp)
     elif exp == UnaryExpression:
         return convert_unary_expression(exp)
+    elif exp == MemberExpression:
+        return convert_member_expression(exp)
 
     raise NotImplementedError("unsupported ast yet: " + exp.__class__.__name__)
 
@@ -82,18 +84,27 @@ def convert_binary_expression(exp):
 
 
 def convert_unary_expression(exp):
-    return "%s(%s)" % (convert_token(exp.operator), convert_expression(exp.expression))
+    expr = convert_expression(exp.expression)
+    tok = convert_token(exp.operator)
+
+    if exp.expression == PrimaryExpression:
+        return "%s%s" % (tok, expr)
+    else:
+        return "%s(%s)" % (tok, expr)
 
 
 def convert_member_expression(exp):
-    ret = convert_expression(exp.group)
+    group = convert_expression(exp.group)
 
     if exp.identifier == ES5Id:
-        ret += "." + convert_token(exp.identifier)
-    else:
-        raise NotImplementedError("unsupported identifier for member expression: " + str(exp.identifier))
+        if exp.group == PrimaryExpression:
+            pattern = "%s.%s"
+        else:
+            pattern = "(%s).%s"
 
-    return ret
+        return pattern % (group, convert_token(exp.identifier))
+    else:
+        return "%s[%s]" % (group, convert_expression(exp.identifier))
 
 
 def convert_primary_expression(exp):
@@ -104,7 +115,7 @@ def convert_args(args):
     ret = "("
     arg_rets = []
     for arg in args:
-        arg_rets.append("(" + convert_expression(arg) + ")")
+        arg_rets.append(convert_expression(arg))
     ret += ",".join(arg_rets) + ")"
     return ret
 

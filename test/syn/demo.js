@@ -57,3 +57,4 @@ a.b["af-erfafs" + 2].d.e;
 0123;
 
 1..toString();
+1.["toString"]();
