@@ -105,7 +105,7 @@ def load_all(**kwargs):
 
 def _main():
     parser = argparse.ArgumentParser(
-        prog="fpjs js fragment tester",
+        prog="test.py",
         description="test converter",
         epilog="maintainer: rapidhere@gmail.com")
 

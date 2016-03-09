@@ -27,7 +27,7 @@ import argparse
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        prog="fp javascript converter",
+        prog="fpjs",
         description="a horrible code destroyer",
         epilog="author & maintainer: rapidhere@gmail.com")
 
