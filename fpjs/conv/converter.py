@@ -63,8 +63,18 @@ def convert_expression(exp):
         return convert_unary_expression(exp)
     elif exp == MemberExpression:
         return convert_member_expression(exp)
+    elif exp == MultipleExpression:
+        return convert_multiple_expression(exp)
 
     raise NotImplementedError("unsupported ast yet: " + exp.__class__.__name__)
+
+
+def convert_multiple_expression(exp):
+    ret = "("
+    ret += ",".join([convert_expression(e) for e in exp])
+    ret += ")"
+
+    return ret
 
 
 def convert_call_expression(exp):

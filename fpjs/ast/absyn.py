@@ -316,6 +316,9 @@ class MultipleExpression(Expression):
     def __init__(self):
         self.expressions = []
 
+    def __iter__(self):
+        return iter(self.expressions)
+
     def append_expression(self, exp):
         self.expressions.append(exp)
 
