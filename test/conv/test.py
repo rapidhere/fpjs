@@ -97,7 +97,7 @@ def load_all(**kwargs):
     ts = unittest.TestSuite()
 
     for fname in os.listdir(BASE_DIR):
-        if fname.endswith(".js"):
+        if fname.endswith(".js") and not fname.startswith("__"):
             ts.addTest(JSFragmentTestCase.load_fragment(fname[:-3], **kwargs))
 
     return ts
@@ -113,13 +113,26 @@ def _main():
         "-v", "--version", action="version",
         help="print the version and exit",
         version="fpjs js fragment tester v0.1")
-    parser.add_argument("--print-ast", help="print ast when tst", action="store_true", default=False)
-    parser.add_argument(
-        "--print-conv", help="print converted result when test", action="store_true", default=False)
-    parser.add_argument(
-        "--print-result", help="print outputs when test", action="store_true", default=False)
 
-    parser.add_argument("fragment", type=str, help="the fragment to test", default="all")
+    parser.add_argument(
+        "--print-ast", action="store_true",
+        help="print ast when tst",
+        default=False)
+
+    parser.add_argument(
+        "--print-conv", action="store_true",
+        help="print converted result when test",
+        default=False)
+
+    parser.add_argument(
+        "--print-result", action="store_true",
+        help="print outputs when test",
+        default=False)
+
+    parser.add_argument(
+        "fragment", type=str,
+        help="the fragment to test, when set to all, will test fragment-files not starts with `__`",
+        default="all")
 
     args = parser.parse_args()
 
