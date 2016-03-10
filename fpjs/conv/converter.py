@@ -50,6 +50,8 @@ def convert_statement(stat):
         return convert_expression(stat.expression)
     elif stat == IfStatement:
         return convert_if_statement(stat)
+    elif stat == WhileStatement:
+        return convert_while_statement(stat)
 
     raise NotImplementedError("unsupported ast yet: " + stat.__class__.__name__)
 
@@ -64,6 +66,12 @@ def convert_if_statement(stat):
             convert_statement(stat.true_statement),
             convert_statement(stat.false_statement),
             convert_expression(stat.test_expression))
+
+
+def convert_while_statement(stat):
+    return const.CODE_FRAGMENT.WHILE_FRAGMENT % (
+        convert_statement(stat.body_statement),
+        convert_expression(stat.test_expression))
 
 
 def convert_expression(exp):
