@@ -48,8 +48,22 @@ def convert_program(prog):
 def convert_statement(stat):
     if stat == ExpressionStatement:
         return convert_expression(stat.expression)
+    elif stat == IfStatement:
+        return convert_if_statement(stat)
 
     raise NotImplementedError("unsupported ast yet: " + stat.__class__.__name__)
+
+
+def convert_if_statement(stat):
+    if not stat.false_statement:
+        return const.CODE_FRAGMENT.IF_FRAGMENT % (
+            convert_statement(stat.true_statement),
+            convert_expression(stat.test_expression))
+    else:
+        return const.CODE_FRAGMENT.IF_ELSE_FRAGMENT % (
+            convert_statement(stat.true_statement),
+            convert_statement(stat.false_statement),
+            convert_expression(stat.test_expression))
 
 
 def convert_expression(exp):
