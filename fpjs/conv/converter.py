@@ -29,134 +29,7 @@ from fpjs.ast.absyn import *
 from fpjs.ast.token import *
 
 import const
-
-
-def convert_program(prog):
-    ret = const.CODE_FRAGMENT.RUNNER_WRAP_BEGIN
-    ret += "("
-
-    stats = []
-    for stat in prog:
-        stats.append(convert_statement(stat))
-    ret += ",".join(stats)
-
-    ret += ")"
-    ret += const.CODE_FRAGMENT.RUNNER_WRAP_END
-    return ret
-
-
-def convert_statement(stat):
-    if stat == ExpressionStatement:
-        return convert_expression(stat.expression)
-    elif stat == IfStatement:
-        return convert_if_statement(stat)
-    elif stat == WhileStatement:
-        return convert_while_statement(stat)
-
-    raise NotImplementedError("unsupported ast yet: " + stat.__class__.__name__)
-
-
-def convert_if_statement(stat):
-    if not stat.false_statement:
-        return const.CODE_FRAGMENT.IF_FRAGMENT % (
-            convert_statement(stat.true_statement),
-            convert_expression(stat.test_expression))
-    else:
-        return const.CODE_FRAGMENT.IF_ELSE_FRAGMENT % (
-            convert_statement(stat.true_statement),
-            convert_statement(stat.false_statement),
-            convert_expression(stat.test_expression))
-
-
-def convert_while_statement(stat):
-    return const.CODE_FRAGMENT.WHILE_FRAGMENT % (
-        convert_statement(stat.body_statement),
-        convert_expression(stat.test_expression))
-
-
-def convert_expression(exp):
-    if exp == CallExpression:
-        return convert_call_expression(exp)
-    elif exp == PrimaryExpression:
-        return convert_primary_expression(exp)
-    elif exp == BinaryExpression:
-        return convert_binary_expression(exp)
-    elif exp == UnaryExpression:
-        return convert_unary_expression(exp)
-    elif exp == MemberExpression:
-        return convert_member_expression(exp)
-    elif exp == MultipleExpression:
-        return convert_multiple_expression(exp)
-
-    raise NotImplementedError("unsupported ast yet: " + exp.__class__.__name__)
-
-
-def convert_multiple_expression(exp):
-    ret = "("
-    ret += ",".join([convert_expression(e) for e in exp])
-    ret += ")"
-
-    return ret
-
-
-def convert_call_expression(exp):
-    assert exp.callee == MemberExpression
-    ret = convert_member_expression(exp.callee)
-    ret += convert_args(exp.arguments)
-
-    return ret
-
-
-def convert_binary_expression(exp):
-    ret = "(%s)" % convert_expression(exp.left)
-    ret += convert_token(exp.operator)
-    ret += "(%s)" % convert_expression(exp.right)
-
-    return ret
-
-
-def convert_unary_expression(exp):
-    expr = convert_expression(exp.expression)
-    tok = convert_token(exp.operator)
-
-    if exp.expression == PrimaryExpression:
-        return "%s%s" % (tok, expr)
-    else:
-        return "%s(%s)" % (tok, expr)
-
-
-def convert_member_expression(exp):
-    group = convert_expression(exp.group)
-
-    if exp.identifier == ES5Id:
-        if exp.group == PrimaryExpression:
-            pattern = "%s.%s"
-        else:
-            pattern = "(%s).%s"
-
-        return pattern % (group, convert_token(exp.identifier))
-    else:
-        return "%s[%s]" % (group, convert_expression(exp.identifier))
-
-
-def convert_primary_expression(exp):
-    return convert_token(exp.value)
-
-
-def convert_args(args):
-    ret = "("
-    arg_rets = []
-    for arg in args:
-        arg_rets.append(convert_expression(arg))
-    ret += ",".join(arg_rets) + ")"
-    return ret
-
-
-def convert_token(tok):
-    if tok == ES5String:
-        return '"%s"' % tok.value
-
-    return tok.value
+from scope import Scope
 
 
 class Converter(object):
@@ -165,6 +38,7 @@ class Converter(object):
 
     def load(self, content):
         self.parser.load(content)
+        self.var_scope = Scope()
 
     def convert(self, print_ast=False, print_conv=False):
         ast = self.parser.parse()
@@ -172,8 +46,123 @@ class Converter(object):
         if print_ast:
             ast.ast_print()
 
-        ret = convert_program(ast)
+        ret = self.convert_program(ast)
         if print_conv:
             print ret
 
         return ret
+
+    def convert_program(self, prog):
+        ret = const.CODE_FRAGMENT.RUNNER_WRAP_BEGIN
+        ret += "("
+
+        stats = []
+        for stat in prog:
+            stats.append(self.convert_statement(stat))
+        ret += ",".join(stats)
+
+        ret += ")"
+        ret += const.CODE_FRAGMENT.RUNNER_WRAP_END
+        return ret
+
+    def convert_statement(self, stat):
+        if stat == ExpressionStatement:
+            return self.convert_expression(stat.expression)
+        elif stat == IfStatement:
+            return self.convert_if_statement(stat)
+        elif stat == WhileStatement:
+            return self.convert_while_statement(stat)
+
+        raise NotImplementedError("unsupported ast yet: " + stat.__class__.__name__)
+
+    def convert_if_statement(self, stat):
+        if not stat.false_statement:
+            return const.CODE_FRAGMENT.IF_FRAGMENT % (
+                self.convert_statement(stat.true_statement),
+                self.convert_expression(stat.test_expression))
+        else:
+            return const.CODE_FRAGMENT.IF_ELSE_FRAGMENT % (
+                self.convert_statement(stat.true_statement),
+                self.convert_statement(stat.false_statement),
+                self.convert_expression(stat.test_expression))
+
+    def convert_while_statement(self, stat):
+        return const.CODE_FRAGMENT.WHILE_FRAGMENT % (
+            self.convert_statement(stat.body_statement),
+            self.convert_expression(stat.test_expression))
+
+    def convert_expression(self, exp):
+        if exp == CallExpression:
+            return self.convert_call_expression(exp)
+        elif exp == PrimaryExpression:
+            return self.convert_primary_expression(exp)
+        elif exp == BinaryExpression:
+            return self.convert_binary_expression(exp)
+        elif exp == UnaryExpression:
+            return self.convert_unary_expression(exp)
+        elif exp == MemberExpression:
+            return self.convert_member_expression(exp)
+        elif exp == MultipleExpression:
+            return self.convert_multiple_expression(exp)
+
+        raise NotImplementedError("unsupported ast yet: " + exp.__class__.__name__)
+
+    def convert_multiple_expression(self, exp):
+        ret = "("
+        ret += ",".join([self.convert_expression(e) for e in exp])
+        ret += ")"
+
+        return ret
+
+    def convert_call_expression(self, exp):
+        assert exp.callee == MemberExpression
+        ret = self.convert_member_expression(exp.callee)
+        ret += self.convert_args(exp.arguments)
+
+        return ret
+
+    def convert_binary_expression(self, exp):
+        ret = "(%s)" % self.convert_expression(exp.left)
+        ret += self.convert_token(exp.operator)
+        ret += "(%s)" % self.convert_expression(exp.right)
+
+        return ret
+
+    def convert_unary_expression(self, exp):
+        expr = self.convert_expression(exp.expression)
+        tok = self.convert_token(exp.operator)
+
+        if exp.expression == PrimaryExpression:
+            return "%s%s" % (tok, expr)
+        else:
+            return "%s(%s)" % (tok, expr)
+
+    def convert_member_expression(self, exp):
+        group = self.convert_expression(exp.group)
+
+        if exp.identifier == ES5Id:
+            if exp.group == PrimaryExpression:
+                pattern = "%s.%s"
+            else:
+                pattern = "(%s).%s"
+
+            return pattern % (group, self.convert_token(exp.identifier))
+        else:
+            return "%s[%s]" % (group, self.convert_expression(exp.identifier))
+
+    def convert_primary_expression(self, exp):
+        return self.convert_token(exp.value)
+
+    def convert_args(self, args):
+        ret = "("
+        arg_rets = []
+        for arg in args:
+            arg_rets.append(self.convert_expression(arg))
+        ret += ",".join(arg_rets) + ")"
+        return ret
+
+    def convert_token(self, tok):
+        if tok == ES5String:
+            return '"%s"' % tok.value
+
+        return tok.value

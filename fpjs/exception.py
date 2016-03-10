@@ -22,7 +22,7 @@ javascript(es5) tokens
 """
 
 __author__ = "rapidhere"
-__all__ = ["LexicalException", "SyntaxExecption", "UnexpectedTokenException"]
+__all__ = ["LexicalException", "SyntaxExecption", "UnexpectedTokenException", "UnknownVariable"]
 
 
 class LexicalException(Exception):
@@ -37,9 +37,14 @@ class SyntaxExecption(Exception):
 
 class UnexpectedTokenException(SyntaxExecption):
     def __init__(self, token):
-        Exception.__init__(self, token.position, "unexpeted token: " + token.value)
+        SyntaxExecption.__init__(self, token.position, "unexpeted token: " + token.value)
 
 
 class UnexpectEOF(SyntaxExecption):
     def __init__(self):
         Exception.__init__(self, "unexpected end of file")
+
+
+class UnknownVariable(Exception):
+    def __init__(self, id):
+        Exception.__init__(self, "line %d, %d: unknown variable `%s`" % (id.pos[0], id.pos[1], id.value))
