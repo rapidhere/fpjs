@@ -140,8 +140,8 @@ class Converter(object):
 
     def convert_while_statement(self, stat):
         return const.CODE_FRAGMENT.WHILE_FRAGMENT % (
-            self.convert_statement(stat.body_statement),
-            self.convert_expression(stat.test_expression))
+            self.convert_expression(stat.test_expression),
+            self.convert_statement(stat.body_statement))
 
     def convert_expression(self, exp):
         if exp == CallExpression:
@@ -156,8 +156,15 @@ class Converter(object):
             return self.convert_member_expression(exp)
         elif exp == MultipleExpression:
             return self.convert_multiple_expression(exp)
+        elif exp == AssignmentExpression:
+            return self.convert_assign_expression(exp)
 
         raise NotImplementedError("unsupported ast yet: " + exp.__class__.__name__)
+
+    def convert_assign_expression(self, exp):
+        return (self.convert_expression(exp.left_hand) +
+                self.convert_token(exp.operator) +
+                self.convert_expression(exp.right_hand))
 
     def convert_multiple_expression(self, exp):
         ret = "("
