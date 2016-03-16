@@ -157,6 +157,9 @@ class Converter(object):
             return self.convert_binary_expression(exp)
         elif exp == UnaryExpression:
             return self.convert_unary_expression(exp)
+        elif exp == FunctionExpression:
+            with self.scope_block(exp):
+                return self.convert_function_expression(exp)
         elif exp == MemberExpression:
             return self.convert_member_expression(exp)
         elif exp == MultipleExpression:
@@ -165,6 +168,12 @@ class Converter(object):
             return self.convert_assign_expression(exp)
 
         raise NotImplementedError("unsupported ast yet: " + exp.__class__.__name__)
+
+    def convert_function_expression(self, exp):
+        return (self.build_scope_wrap_begin() +
+                "(" + ",".join([arg_id.value for arg_id in exp.arguments]) + ")=>" +
+                self.convert_statement(exp.body_statement) +
+                self.build_scope_wrap_end())
 
     def convert_assign_expression(self, exp):
         return (self.convert_expression(exp.left_hand) +
@@ -180,7 +189,7 @@ class Converter(object):
 
     def convert_call_expression(self, exp):
         assert exp.callee == MemberExpression
-        ret = self.convert_member_expression(exp.callee)
+        ret = self.convert_expression(exp.callee)
         ret += self.convert_args(exp.arguments)
 
         return ret
