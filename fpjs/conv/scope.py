@@ -47,3 +47,10 @@ class Scope(object):
 
     def __setitem__(self, key, value):
         self.scopes[-1][key.value] = value
+        return value
+
+    def __iter__(self):
+        return iter(sorted(self.scopes[-1].keys()))
+
+    def values(self):
+        return [self.scopes[-1][key] for key in self]

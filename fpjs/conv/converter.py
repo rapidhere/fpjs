@@ -86,8 +86,15 @@ class Converter(object):
             for stat in ast:
                 self.build_scope(stat)
 
+    def build_scope_wrap_begin(self):
+        return "((" + ",".join(self.var_scope) + ")=>"
+
+    def build_scope_wrap_end(self):
+        return ")()"
+
     def convert_program(self, prog):
         ret = const.CODE_FRAGMENT.RUNNER_WRAP_BEGIN
+        ret += self.build_scope_wrap_begin()
         ret += "("
 
         stats = []
@@ -96,6 +103,7 @@ class Converter(object):
         ret += ",".join(stats)
 
         ret += ")"
+        ret += self.build_scope_wrap_end()
         ret += const.CODE_FRAGMENT.RUNNER_WRAP_END
         return ret
 
@@ -106,8 +114,18 @@ class Converter(object):
             return self.convert_if_statement(stat)
         elif stat == WhileStatement:
             return self.convert_while_statement(stat)
+        elif stat == VariableStatement:
+            return self.convert_variable_statement(stat)
 
         raise NotImplementedError("unsupported ast yet: " + stat.__class__.__name__)
+
+    def convert_variable_statement(self, stat):
+        ret = []
+        for var in stat:
+            if var.init is not None:
+                ret.append("%s=%s" % (var.var_id.value, self.convert_expression(var.init)))
+
+        return "(" + ",".join(ret) + ")"
 
     def convert_if_statement(self, stat):
         if not stat.false_statement:
