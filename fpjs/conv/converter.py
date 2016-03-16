@@ -23,6 +23,7 @@ the converter
 
 __author__ = "rapidhere"
 
+from contextlib import contextmanager
 
 from fpjs.ast import ES5Parser
 from fpjs.ast.absyn import *
@@ -46,11 +47,44 @@ class Converter(object):
         if print_ast:
             ast.ast_print()
 
-        ret = self.convert_program(ast)
+        with self.scope_block(ast):
+            ret = self.convert_program(ast)
+
         if print_conv:
             print ret
 
         return ret
+
+    @contextmanager
+    def scope_block(self, ast):
+        self.var_scope.enter_scope()
+
+        if ast == Program:
+            for stat in ast:
+                self.build_scope(stat)
+        elif ast == FunctionExpression or ast == FunctionStatement:
+            self.build_scope(ast.body_statement)
+        else:
+            raise AssertionError("cannot build scope for ast: " + ast.__class__.__name__)
+
+        yield self.var_scope
+        self.var_scope.leave_scope()
+
+    def build_scope(self, ast):
+        if ast == IfStatement:
+            self.build_scope(ast.true_statement)
+            if ast.false_statement:
+                self.build_scope(ast.false_statement)
+        elif (ast == WhileStatement or
+                ast == DoWhileStatement or
+                ast == ForStatement):
+            self.build_scope(ast.body_statement)
+        elif ast == VariableStatement:
+            for var in ast:
+                self.var_scope[var.var_id] = var
+        elif ast == BlockStatement:
+            for stat in ast:
+                self.build_scope(stat)
 
     def convert_program(self, prog):
         ret = const.CODE_FRAGMENT.RUNNER_WRAP_BEGIN
