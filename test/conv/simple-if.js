@@ -13,3 +13,12 @@ if(false)
   console.log("should not see");
 else
   console.log("finish");
+
+if(false)
+  console.log("should not see");
+else {
+  console.log("hahahahah");
+  if(true) {
+    console.log("en");
+  }
+}

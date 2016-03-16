@@ -116,8 +116,13 @@ class Converter(object):
             return self.convert_while_statement(stat)
         elif stat == VariableStatement:
             return self.convert_variable_statement(stat)
+        elif stat == BlockStatement:
+            return self.convert_block_statement(stat)
 
         raise NotImplementedError("unsupported ast yet: " + stat.__class__.__name__)
+
+    def convert_block_statement(self, stat):
+        return "(" + ",".join([self.convert_statement(s) for s in stat]) + ")"
 
     def convert_variable_statement(self, stat):
         ret = []
