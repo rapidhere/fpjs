@@ -84,6 +84,19 @@ class BlockStatement(Statement):
             stat.ast_print(indent + 1)
 
 
+def convert_to_block_statement(stat):
+    if not isinstance(stat, Statement):
+        return
+
+    if stat == BlockStatement:
+        return stat
+
+    ret = BlockStatement()
+    ret.append(stat)
+
+    return ret
+
+
 class FunctionStatement(Statement):
     def __init__(self, tok, id, args, body):
         self.token = tok
@@ -160,8 +173,8 @@ class IfStatement(Statement):
     def __init__(self, if_tok, test_exp, true_stat, false_stat):
         self.if_token = if_tok
         self.test_expression = test_exp
-        self.true_statement = true_stat
-        self.false_statement = false_stat
+        self.true_statement = convert_to_block_statement(true_stat)
+        self.false_statement = convert_to_block_statement(false_stat)
 
     def position(self):
         return self.if_token.position
@@ -216,7 +229,7 @@ class WhileStatement(Statement):
     def __init__(self, tok, test_exp, body_stat):
         self.token = tok
         self.test_expression = test_exp
-        self.body_statement = body_stat
+        self.body_statement = convert_to_block_statement(body_stat)
 
     def position(self):
         return self.token.position
@@ -233,7 +246,7 @@ class DoWhileStatement(Statement):
     def __init__(self, tok, test_exp, body_stat):
         self.token = tok
         self.test_expression = test_exp
-        self.body_statement = body_stat
+        self.body_statement = convert_to_block_statement(body_stat)
 
     def position(self):
         return self.token.position
@@ -252,7 +265,7 @@ class ForStatement(Statement):
         self.init_expression = init_exp
         self.test_expression = test_exp
         self.increment_expression = inc_exp
-        self.body_statement = body_stat
+        self.body_statement = convert_to_block_statement(body_stat)
 
     def position(self):
         return self.token.position

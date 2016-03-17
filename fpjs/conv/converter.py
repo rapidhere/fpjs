@@ -86,17 +86,27 @@ class Converter(object):
     def convert_program(self, prog):
         return self._convert_multiple_statements(iter(prog))
 
-    def _convert_multiple_statements(self, stats):
+    def _convert_multiple_statements(self, stats, has_after_stat=False):
         rstats = []
         after = "undefined"
+        end_with_return = False
+
         for stat in stats:
             if (stat == IfStatement or
                     stat == WhileStatement):
                 after = "(()=>%s)" % self._convert_multiple_statements(stats)
                 rstats.append(self._convert_with_after_statement(stat, after))
+
+                break
+            elif stat == ReturnStatement:
+                rstats.append(self.convert_return_statement(stat))
+                end_with_return = True
                 break
             else:
                 rstats.append(self.convert_statement(stat))
+
+        if not end_with_return and has_after_stat:
+            rstats.append("__A()")
 
         if rstats:
             return "(" + ",".join(rstats) + ")"
@@ -115,6 +125,9 @@ class Converter(object):
 
     def convert_block_statement(self, stat):
         return self._convert_multiple_statements(iter(stat))
+
+    def convert_return_statement(self, stat):
+        return self.convert_expression(stat.expression)
 
     def convert_variable_statement(self, stat):
         ret = []
@@ -142,14 +155,14 @@ class Converter(object):
     def convert_if_statement(self, stat, after):
         if not stat.false_statement:
             return const.CODE_FRAGMENT.IF_ELSE_FRAGMENT % (
-                self.convert_statement(stat.true_statement),
-                "undefined",
+                self._convert_multiple_statements(iter(stat.true_statement), True),
+                "undefined,__A()",
                 self.convert_expression(stat.test_expression),
                 after)
         else:
             return const.CODE_FRAGMENT.IF_ELSE_FRAGMENT % (
-                self.convert_statement(stat.true_statement),
-                self.convert_statement(stat.false_statement),
+                self._convert_multiple_statements(iter(stat.true_statement), True),
+                self._convert_multiple_statements(iter(stat.false_statement), True),
                 self.convert_expression(stat.test_expression),
                 after)
 
