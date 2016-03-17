@@ -130,7 +130,9 @@ class Converter(object):
             if var.init is not None:
                 ret.append("%s=%s" % (var.var_id.value, self.convert_expression(var.init)))
 
-        return "(" + ",".join(ret) + ")"
+        if ret:
+            return "(" + ",".join(ret) + ")"
+        return "undefined"
 
     def convert_if_statement(self, stat):
         if not stat.false_statement:
