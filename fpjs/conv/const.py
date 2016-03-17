@@ -25,7 +25,7 @@ __author__ = "rapidhere"
 
 
 class CODE_FRAGMENT:
-    Y_COMBINATOR = r"(F)=>((G)=>G(G))((self)=>F((...args)=>self(self).apply(this, args)))"
+    Y_COMBINATOR = r"(F)=>()=>((G)=>G(G))((self)=>F(()=>self(self)))"
     Y_COMBINATOR_NAME = r"__Y"
     Y_COMBINATOR_FRAGMENT = Y_COMBINATOR_NAME + r"(%s)"
 
@@ -34,4 +34,4 @@ class CODE_FRAGMENT:
 
     IF_ELSE_FRAGMENT = r"((__T,__A)=>(__T&&(%s,__A()))||(!__T&&(%s,__A())))(%s,%s)"
 
-    WHILE_FRAGMENT = r"((__A)=>%s())(%%s)" % (Y_COMBINATOR_FRAGMENT % "(__W)=>()=>(%s)?(%s,__W()):__A()")
+    WHILE_FRAGMENT = r"((__A)=>%s())(%%s)" % (Y_COMBINATOR_FRAGMENT % "(__W)=>(%s)?(%s,__W()):__A()")
