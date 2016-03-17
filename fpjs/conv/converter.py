@@ -86,7 +86,7 @@ class Converter(object):
     def convert_program(self, prog):
         return self._convert_multiple_statements(iter(prog))
 
-    def _convert_multiple_statements(self, stats, has_after_stat=False):
+    def _convert_multiple_statements(self, stats, has_after_stat=False, in_loop=False):
         rstats = []
         after = "undefined"
         end_with_return = False
@@ -106,7 +106,10 @@ class Converter(object):
                 rstats.append(self.convert_statement(stat))
 
         if not end_with_return and has_after_stat:
-            rstats.append("__A()")
+            if in_loop:
+                rstats.append("__W()")
+            else:
+                rstats.append("__A()")
 
         if rstats:
             return "(" + ",".join(rstats) + ")"
@@ -169,7 +172,7 @@ class Converter(object):
     def convert_while_statement(self, stat, after):
         return const.CODE_FRAGMENT.WHILE_FRAGMENT % (
             self.convert_expression(stat.test_expression),
-            self.convert_statement(stat.body_statement),
+            self._convert_multiple_statements(iter(stat.body_statement), True, True),
             after)
 
     def convert_expression(self, exp):
