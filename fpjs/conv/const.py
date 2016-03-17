@@ -35,4 +35,4 @@ class CODE_FRAGMENT:
     IF_FRAGMENT = r"((__T)=>__T&&(%s))(%s)"
     IF_ELSE_FRAGMENT = r"((__T)=>(__T&&(%s))||(!__T&&(%s)))(%s)"
 
-    WHILE_FRAGMENT = (Y_COMBINATOR_FRAGMENT % "((__W)=>()=>(%s)?(%s,__W()):undefined)") + r"()"
+    WHILE_FRAGMENT = (Y_COMBINATOR_FRAGMENT % "(__W)=>()=>(%s)&&(%s,__W())") + r"()"
