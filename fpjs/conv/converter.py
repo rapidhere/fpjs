@@ -23,13 +23,12 @@ the converter
 
 __author__ = "rapidhere"
 
-from contextlib import contextmanager
-
 from fpjs.ast import ES5Parser
 from fpjs.ast.absyn import *
 from fpjs.ast.token import *
 
 import const
+from dec import scope_block
 from scope import Scope
 
 
@@ -47,28 +46,12 @@ class Converter(object):
         if print_ast:
             ast.ast_print()
 
-        with self.scope_block(ast):
-            ret = self.convert_program(ast)
+        ret = self.wrap_runner(ast)
 
         if print_conv:
             print ret
 
         return ret
-
-    @contextmanager
-    def scope_block(self, ast):
-        self.var_scope.enter_scope()
-
-        if ast == Program:
-            for stat in ast:
-                self.build_scope(stat)
-        elif ast == FunctionExpression or ast == FunctionStatement:
-            self.build_scope(ast.body_statement)
-        else:
-            raise AssertionError("cannot build scope for ast: " + ast.__class__.__name__)
-
-        yield self.var_scope
-        self.var_scope.leave_scope()
 
     def build_scope(self, ast):
         if ast == IfStatement:
@@ -92,20 +75,20 @@ class Converter(object):
     def build_scope_wrap_end(self):
         return ")()"
 
-    def convert_program(self, prog):
+    def wrap_runner(self, ast):
         ret = const.CODE_FRAGMENT.RUNNER_WRAP_BEGIN
-        ret += self.build_scope_wrap_begin()
-        ret += "("
+        ret += self.convert_program(ast)
+        ret += const.CODE_FRAGMENT.RUNNER_WRAP_END
 
+        return ret
+
+    @scope_block
+    def convert_program(self, prog):
         stats = []
         for stat in prog:
             stats.append(self.convert_statement(stat))
-        ret += ",".join(stats)
 
-        ret += ")"
-        ret += self.build_scope_wrap_end()
-        ret += const.CODE_FRAGMENT.RUNNER_WRAP_END
-        return ret
+        return "(" + ",".join(stats) + ")"
 
     def convert_statement(self, stat):
         if stat == ExpressionStatement:
@@ -160,8 +143,7 @@ class Converter(object):
         elif exp == UnaryExpression:
             return self.convert_unary_expression(exp)
         elif exp == FunctionExpression:
-            with self.scope_block(exp):
-                return self.convert_function_expression(exp)
+            return self.convert_function_expression(exp)
         elif exp == MemberExpression:
             return self.convert_member_expression(exp)
         elif exp == MultipleExpression:
@@ -171,11 +153,10 @@ class Converter(object):
 
         raise NotImplementedError("unsupported ast yet: " + exp.__class__.__name__)
 
+    @scope_block
     def convert_function_expression(self, exp):
-        return (self.build_scope_wrap_begin() +
-                "(" + ",".join([arg_id.value for arg_id in exp.arguments]) + ")=>" +
-                self.convert_statement(exp.body_statement) +
-                self.build_scope_wrap_end())
+        return ("(" + ",".join([arg_id.value for arg_id in exp.arguments]) + ")=>" +
+                self.convert_statement(exp.body_statement))
 
     def convert_assign_expression(self, exp):
         return (self.convert_expression(exp.left_hand) +
