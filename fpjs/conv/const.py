@@ -36,3 +36,7 @@ class CODE_FRAGMENT:
     IF_ELSE_FRAGMENT = r"((__T)=>(__T&&(%s))||(!__T&&(%s)))(%s)"
 
     WHILE_FRAGMENT = (Y_COMBINATOR_FRAGMENT % "(__W)=>()=>(%s)&&(%s,__W())") + r"()"
+
+    RETURN_NAME = r"__R"
+    CALL_WRAP_BEGIN = r"((%s)=>" % RETURN_NAME
+    CALL_WRAP_END = r")()"

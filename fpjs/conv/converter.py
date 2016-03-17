@@ -172,10 +172,10 @@ class Converter(object):
 
     def convert_call_expression(self, exp):
         assert exp.callee == MemberExpression
-        ret = self.convert_expression(exp.callee)
-        ret += self.convert_args(exp.arguments)
-
-        return ret
+        return (const.CODE_FRAGMENT.CALL_WRAP_BEGIN +
+                self.convert_expression(exp.callee) +
+                self.convert_args(exp.arguments) +
+                const.CODE_FRAGMENT.CALL_WRAP_END)
 
     def convert_binary_expression(self, exp):
         ret = "(%s)" % self.convert_expression(exp.left)
