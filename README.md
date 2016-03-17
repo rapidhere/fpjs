@@ -63,6 +63,42 @@ then we get the recursion function `fact`
 fact(10); // return 3628800
 ```
 
+but we only need Y-combinator for loops, so the arguments is useless, the simplified Y-combinator is
+
+```
+var Y = function(F) {
+  var G = function(self) {
+    return F(function() {
+      return self(self);
+    });
+  };
+
+  return function() {
+    G(G);
+  };
+};
+```
+
+And if we need the it to run at once, we can change it to
+
+```
+var Y = function(F) {
+  var G = function(self) {
+    return F(function() {
+      return self(self);
+    });
+  };
+
+  return G(G);
+};
+```
+
+rewrite with ES6
+
+```
+(F)=>((G)=>G(G))((self)=>F(()=>self(self)))
+```
+
 LICENSE
 ---
 

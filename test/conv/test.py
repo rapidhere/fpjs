@@ -56,7 +56,7 @@ class JSFragmentTestCase(unittest.TestCase):
 
     @staticmethod
     def _run(content):
-        return subprocess.check_output(["node", "--harmony_rest_parameters", "-e", content])
+        return subprocess.check_output(["node", "-e", content])
 
     @classmethod
     def load_fragment(cls, fragment_name, **kwargs):
