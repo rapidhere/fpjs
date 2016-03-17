@@ -1,4 +1,4 @@
-JUST A JS AST
+Functional-Way-Onelined-ECMAScript5
 ===
 
 [![Build Status](https://travis-ci.org/rapidhere/fpjs.svg?branch=master)](https://travis-ci.org/rapidhere/fpjs)
