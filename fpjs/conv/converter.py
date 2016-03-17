@@ -84,19 +84,28 @@ class Converter(object):
 
     @scope_block
     def convert_program(self, prog):
-        stats = []
-        for stat in prog:
-            stats.append(self.convert_statement(stat))
+        return self._convert_multiple_statements(iter(prog))
 
-        return "(" + ",".join(stats) + ")"
+    def _convert_multiple_statements(self, stats):
+        rstats = []
+        after = "undefined"
+        for stat in stats:
+            if (stat == IfStatement or
+                    stat == WhileStatement):
+                after = "(()=>%s)" % self._convert_multiple_statements(stats)
+                rstats.append(self._convert_with_after_statement(stat, after))
+                break
+            else:
+                rstats.append(self.convert_statement(stat))
+
+        if rstats:
+            return "(" + ",".join(rstats) + ")"
+        else:
+            return "undefined"
 
     def convert_statement(self, stat):
         if stat == ExpressionStatement:
             return self.convert_expression(stat.expression)
-        elif stat == IfStatement:
-            return self.convert_if_statement(stat)
-        elif stat == WhileStatement:
-            return self.convert_while_statement(stat)
         elif stat == VariableStatement:
             return self.convert_variable_statement(stat)
         elif stat == BlockStatement:
@@ -105,7 +114,7 @@ class Converter(object):
         raise NotImplementedError("unsupported ast yet: " + stat.__class__.__name__)
 
     def convert_block_statement(self, stat):
-        return "(" + ",".join([self.convert_statement(s) for s in stat]) + ")"
+        return self._convert_multiple_statements(iter(stat))
 
     def convert_variable_statement(self, stat):
         ret = []
@@ -117,21 +126,38 @@ class Converter(object):
             return "(" + ",".join(ret) + ")"
         return "undefined"
 
-    def convert_if_statement(self, stat):
+    def _convert_with_after_statement(self, stat, after):
+        ret = None
+
+        if stat == IfStatement:
+            ret = self.convert_if_statement(stat, after)
+        elif stat == WhileStatement:
+            ret = self.convert_while_statement(stat, after)
+
+        if not ret:
+            raise AssertionError("not a with-after statement or not implemented: " + stat.__class__.__name__)
+
+        return ret
+
+    def convert_if_statement(self, stat, after):
         if not stat.false_statement:
-            return const.CODE_FRAGMENT.IF_FRAGMENT % (
+            return const.CODE_FRAGMENT.IF_ELSE_FRAGMENT % (
                 self.convert_statement(stat.true_statement),
-                self.convert_expression(stat.test_expression))
+                "undefined",
+                self.convert_expression(stat.test_expression),
+                after)
         else:
             return const.CODE_FRAGMENT.IF_ELSE_FRAGMENT % (
                 self.convert_statement(stat.true_statement),
                 self.convert_statement(stat.false_statement),
-                self.convert_expression(stat.test_expression))
+                self.convert_expression(stat.test_expression),
+                after)
 
-    def convert_while_statement(self, stat):
+    def convert_while_statement(self, stat, after):
         return const.CODE_FRAGMENT.WHILE_FRAGMENT % (
             self.convert_expression(stat.test_expression),
-            self.convert_statement(stat.body_statement))
+            self.convert_statement(stat.body_statement),
+            after)
 
     def convert_expression(self, exp):
         if exp == CallExpression:
@@ -172,10 +198,8 @@ class Converter(object):
 
     def convert_call_expression(self, exp):
         assert exp.callee == MemberExpression
-        return (const.CODE_FRAGMENT.CALL_WRAP_BEGIN +
-                self.convert_expression(exp.callee) +
-                self.convert_args(exp.arguments) +
-                const.CODE_FRAGMENT.CALL_WRAP_END)
+        return (self.convert_expression(exp.callee) +
+                self.convert_args(exp.arguments))
 
     def convert_binary_expression(self, exp):
         ret = "(%s)" % self.convert_expression(exp.left)
