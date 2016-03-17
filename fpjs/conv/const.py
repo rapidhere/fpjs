@@ -32,7 +32,7 @@ class CODE_FRAGMENT:
     RUNNER_WRAP_BEGIN = r"((%s)=>" % Y_COMBINATOR_NAME
     RUNNER_WRAP_END = r")(%s);" % Y_COMBINATOR
 
-    IF_FRAGMENT = r"((T)=>T&&(%s))(%s)"
-    IF_ELSE_FRAGMENT = r"((T)=>(T&&(%s))||(!T&&(%s)))(%s)"
+    IF_FRAGMENT = r"((__T)=>__T&&(%s))(%s)"
+    IF_ELSE_FRAGMENT = r"((__T)=>(__T&&(%s))||(!__T&&(%s)))(%s)"
 
     WHILE_FRAGMENT = (Y_COMBINATOR_FRAGMENT % "((__W)=>()=>(%s)?(%s,__W()):undefined)") + r"()"
