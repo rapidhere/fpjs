@@ -93,7 +93,8 @@ class Converter(object):
         for stat in stats:
             if (stat == IfStatement or
                     stat == WhileStatement or
-                    stat == DoWhileStatement):
+                    stat == DoWhileStatement or
+                    stat == ForStatement):
                 after = "(()=>%s)" % self._convert_multiple_statements(stats)
                 rstats.append(self._convert_with_after_statement(stat, after))
 
@@ -115,6 +116,11 @@ class Converter(object):
                 break
             elif stat == FakeIfContinueStatement:
                 rstats.append("(%s)?__W():__WA()" % self.convert_expression(stat.test_expression))
+                break
+            elif stat == FakeForContinueStatement:
+                rstats.append("(%s, (%s)?__W():__WA())" % (
+                    self.convert_expression(stat.increment_expression),
+                    self.convert_expression(stat.test_expression)))
                 break
             else:
                 rstats.append(self.convert_statement(stat))
@@ -165,6 +171,8 @@ class Converter(object):
             ret = self.convert_while_statement(stat, after)
         elif stat == DoWhileStatement:
             ret = self.convert_do_while_statement(stat, after)
+        elif stat == ForStatement:
+            ret = self.convert_for_statement(stat, after)
 
         if not ret:
             raise AssertionError("not a with-after statement or not implemented: " + stat.__class__.__name__)
@@ -194,7 +202,18 @@ class Converter(object):
             self._convert_multiple_statements(iter(stat.body_statement)),
             after)
 
+    def convert_for_statement(self, stat, after):
+        stat.body_statement.append(FakeForContinueStatement(stat.test_expression, stat.increment_expression))
+
+        return const.CODE_FRAGMENT.FOR_FRAGMENT % (
+            self.convert_expression(stat.init_expression),
+            self._convert_multiple_statements(iter(stat.body_statement)),
+            after)
+
     def convert_expression(self, exp):
+        if not exp:
+            return "undefined"
+
         if exp == CallExpression:
             return self.convert_call_expression(exp)
         elif exp == PrimaryExpression:

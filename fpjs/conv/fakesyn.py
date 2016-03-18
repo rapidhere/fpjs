@@ -23,7 +23,7 @@ some FAKE abstract syntax components to make world better
 """
 
 __author__ = "rapidhere"
-__all__ = ["FakeContinueStatement", "FakeBreakStatement", "FakeIfContinueStatement"]
+__all__ = ["FakeContinueStatement", "FakeBreakStatement", "FakeIfContinueStatement", "FakeForContinueStatement"]
 
 from fpjs.ast.absyn import Statement
 
@@ -41,3 +41,9 @@ class FakeBreakStatement(Statement):
 class FakeIfContinueStatement(Statement):
     def __init__(self, test):
         self.test_expression = test
+
+
+class FakeForContinueStatement(Statement):
+    def __init__(self, test, inc):
+        self.test_expression = test
+        self.increment_expression = inc

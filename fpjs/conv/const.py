@@ -37,3 +37,5 @@ class CODE_FRAGMENT:
     WHILE_FRAGMENT = r"((__WA)=>%s)(%%s)" % (Y_COMBINATOR_FRAGMENT % "(__W)=>(%s)?(%s):__WA()")
 
     DO_WHILE_FRAGMENT = r"((__WA)=>%s)(%%s)" % (Y_COMBINATOR_FRAGMENT % "(__W)=>%s")
+
+    FOR_FRAGMENT = r"((__WA)=>(%s))(%%s)" % ("%s," + (Y_COMBINATOR_FRAGMENT % "(__W)=>%s"))
