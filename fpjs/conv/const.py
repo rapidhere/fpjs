@@ -35,3 +35,5 @@ class CODE_FRAGMENT:
     IF_ELSE_FRAGMENT = r"((__T,__A)=>(__T&&(%s))||(!__T&&(%s)))(%s,%s)"
 
     WHILE_FRAGMENT = r"((__WA)=>%s)(%%s)" % (Y_COMBINATOR_FRAGMENT % "(__W)=>(%s)?(%s):__WA()")
+
+    DO_WHILE_FRAGMENT = r"((__WA)=>%s)(%%s)" % (Y_COMBINATOR_FRAGMENT % "(__W)=>%s")

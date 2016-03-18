@@ -92,7 +92,8 @@ class Converter(object):
 
         for stat in stats:
             if (stat == IfStatement or
-                    stat == WhileStatement):
+                    stat == WhileStatement or
+                    stat == DoWhileStatement):
                 after = "(()=>%s)" % self._convert_multiple_statements(stats)
                 rstats.append(self._convert_with_after_statement(stat, after))
 
@@ -111,6 +112,9 @@ class Converter(object):
                 break
             elif stat == FakeContinueStatement:
                 rstats.append("__W()")
+                break
+            elif stat == FakeIfContinueStatement:
+                rstats.append("(%s)?__W():__WA()" % self.convert_expression(stat.test_expression))
                 break
             else:
                 rstats.append(self.convert_statement(stat))
@@ -159,6 +163,8 @@ class Converter(object):
             ret = self.convert_if_statement(stat, after)
         elif stat == WhileStatement:
             ret = self.convert_while_statement(stat, after)
+        elif stat == DoWhileStatement:
+            ret = self.convert_do_while_statement(stat, after)
 
         if not ret:
             raise AssertionError("not a with-after statement or not implemented: " + stat.__class__.__name__)
@@ -179,6 +185,12 @@ class Converter(object):
         stat.body_statement.append(FakeContinueStatement())
         return const.CODE_FRAGMENT.WHILE_FRAGMENT % (
             self.convert_expression(stat.test_expression),
+            self._convert_multiple_statements(iter(stat.body_statement)),
+            after)
+
+    def convert_do_while_statement(self, stat, after):
+        stat.body_statement.append(FakeIfContinueStatement(stat.test_expression))
+        return const.CODE_FRAGMENT.DO_WHILE_FRAGMENT % (
             self._convert_multiple_statements(iter(stat.body_statement)),
             after)
 
