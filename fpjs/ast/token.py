@@ -39,7 +39,8 @@ __all__ = [
     "ES5Var", "ES5New", "ES5Function", "ES5Null", "ES5True", "ES5False", "ES5Undefined", "ES5For", "ES5Do",
     "ES5While", "ES5If", "ES5Else", "ES5Comma", "ES5Colon", "ES5Dot", "ES5SemiColon", "ES5LeftParenthesis",
     "ES5RightParenthesis", "ES5LeftBracket", "ES5RightBracket", "ES5LeftBrace", "ES5RightBrace", "ES5String",
-    "ES5UnaryOperator", "ES5BinaryOperator", "ES5Number", "ES5SemiColon", "ES5Id", "ES5Return"]
+    "ES5UnaryOperator", "ES5BinaryOperator", "ES5Number", "ES5SemiColon", "ES5Id", "ES5Return", "ES5Break",
+    "ES5Continue"]
 
 import re
 import types

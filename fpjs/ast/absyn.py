@@ -153,6 +153,32 @@ class ArgumentList(ES5AbstractSyntax):
             arg.ast_print(indent + 1)
 
 
+class BreakStatement(Statement):
+    def __init__(self, tok, id):
+        self.identifier = id  # id is always null currently
+        self.token = tok
+
+    def position(self):
+        return self.token.position
+
+    def ast_print(self, indent=0):
+        self._print(indent, "BreakStatement:")
+        self._print(indent + 1, str(self.token))
+
+
+class ContinueStatement(Statement):
+    def __init__(self, tok, id):
+        self.identifier = id  # id is always null currently
+        self.token = tok
+
+    def position(self):
+        return self.token.position
+
+    def ast_print(self, indent=0):
+        self._print(indent, "ContinueStatement:")
+        self._print(indent + 1, str(self.token))
+
+
 class ReturnStatement(Statement):
     def __init__(self, tok, exp):
         self.expression = exp

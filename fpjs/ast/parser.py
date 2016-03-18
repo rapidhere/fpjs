@@ -142,6 +142,14 @@ def parse_statement(lexer):
         expect_next(lexer, ES5SemiColon)
 
         return ReturnStatement(token, exp)
+    elif token == ES5Break:
+        lexer.next_token()
+        expect_next(lexer, ES5SemiColon)
+        return BreakStatement(token, None)
+    elif token == ES5Continue:
+        lexer.next_token()
+        expect_next(lexer, ES5SemiColon)
+        return ContinueStatement(token, None)
     elif token == ES5LeftBrace:
         r = BlockStatement()
         lexer.next_token()
