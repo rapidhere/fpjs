@@ -8,4 +8,12 @@ while(a > 0) {
   a -= 1;
 }
 
+a = 10;
+while(a > 0) {
+  console.log("working");
+  a -= 1;
+  continue;
+  break;
+}
+
 console.log("end");

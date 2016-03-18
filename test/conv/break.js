@@ -8,4 +8,10 @@ while(a > 0) {
   a -= 1;
 }
 
+while(1) {
+  console.log("working");
+  break;
+  console.log("should not reach");
+}
+
 console.log("end");
