@@ -26,7 +26,7 @@ regex
 
 ?:, ++, --
 
-with, instanceof, typeof, switch, case, try, catch, finally, void, break, continue,
+with, instanceof, typeof, switch, case, try, catch, finally, void,
 this, default, throw, delete, in
 
 octocal and hexical number
@@ -114,6 +114,14 @@ class ES5False(ES5Token):
 
 class ES5Undefined(ES5Token):
     pattern = re.compile("undefined" + boundary)
+
+
+class ES5Break(ES5Token):
+    pattern = re.compile("break" + boundary)
+
+
+class ES5Continue(ES5Token):
+    pattern = re.compile("continue" + boundary)
 
 
 class ES5For(ES5Token):
@@ -210,6 +218,8 @@ _lex_cls_order = (
     ES5True,
     ES5False,
     ES5Undefined,
+    ES5Break,
+    ES5Continue,
     ES5For,
     ES5Do,
     ES5While,

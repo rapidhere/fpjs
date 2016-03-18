@@ -64,3 +64,6 @@ var d = function() {
     return undefined;
   }()();
 };
+
+break;
+continue;
