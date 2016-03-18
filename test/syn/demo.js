@@ -44,7 +44,7 @@ function func(a, b, c) {
   return a - b + 3;
 }
 
-function (a, d) {
+function t (a, d) {
   return a + d / 10 % 3;
 }
 
@@ -58,3 +58,9 @@ a.b["af-erfafs" + 2].d.e;
 
 1..toString();
 1.["toString"]();
+
+var d = function() {
+  return function() {
+    return undefined;
+  }()();
+};

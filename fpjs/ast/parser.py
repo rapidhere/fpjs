@@ -47,7 +47,8 @@ def is_literal(tok):
         tok == ES5True or
         tok == ES5False or
         tok == ES5Number or
-        tok == ES5String)
+        tok == ES5String or
+        tok == ES5Undefined)
 
 
 def parse_program(lexer):
@@ -136,6 +137,7 @@ def parse_statement(lexer):
     elif token == ES5Return:
         # TODO: there should be no \n here, not checked
         lexer.next_token()
+
         exp = parse_expression(lexer)
         expect_next(lexer, ES5SemiColon)
 

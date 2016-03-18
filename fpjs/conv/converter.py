@@ -213,7 +213,6 @@ class Converter(object):
         return ret
 
     def convert_call_expression(self, exp):
-        assert exp.callee == MemberExpression
         return (self.convert_expression(exp.callee) +
                 self.convert_args(exp.arguments))
 
