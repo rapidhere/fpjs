@@ -86,7 +86,7 @@ class BlockStatement(Statement):
 
 def convert_to_block_statement(stat):
     if not isinstance(stat, Statement):
-        return
+        return BlockStatement()
 
     if stat == BlockStatement:
         return stat

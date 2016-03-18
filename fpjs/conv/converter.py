@@ -27,6 +27,7 @@ from fpjs.ast import ES5Parser
 from fpjs.ast.absyn import *
 from fpjs.ast.token import *
 
+from fakesyn import *
 import const
 from dec import scope_block
 from scope import Scope
@@ -86,10 +87,8 @@ class Converter(object):
     def convert_program(self, prog):
         return self._convert_multiple_statements(iter(prog))
 
-    def _convert_multiple_statements(self, stats, has_after_stat=False, in_loop=False):
+    def _convert_multiple_statements(self, stats):
         rstats = []
-        after = "undefined"
-        end_with_return = False
 
         for stat in stats:
             if (stat == IfStatement or
@@ -100,16 +99,21 @@ class Converter(object):
                 break
             elif stat == ReturnStatement:
                 rstats.append(self.convert_return_statement(stat))
-                end_with_return = True
+                break
+            elif stat == BreakStatement:
+                rstats.append(self.convert_break_statement(stat))
+                break
+            elif stat == ContinueStatement:
+                rstats.append(self.convert_continue_statement(stat))
+                break
+            elif stat == FakeBreakStatement:
+                rstats.append("__A()")
+                break
+            elif stat == FakeContinueStatement:
+                rstats.append("__W()")
                 break
             else:
                 rstats.append(self.convert_statement(stat))
-
-        if not end_with_return and has_after_stat:
-            if in_loop:
-                rstats.append("__W()")
-            else:
-                rstats.append("__A()")
 
         if rstats:
             return "(" + ",".join(rstats) + ")"
@@ -125,6 +129,12 @@ class Converter(object):
             return self.convert_block_statement(stat)
 
         raise NotImplementedError("unsupported ast yet: " + stat.__class__.__name__)
+
+    def convert_break_statement(self, stat):
+        return "__WA()"
+
+    def convert_continue_statement(self, stat):
+        return "__W()"
 
     def convert_block_statement(self, stat):
         return self._convert_multiple_statements(iter(stat))
@@ -156,23 +166,20 @@ class Converter(object):
         return ret
 
     def convert_if_statement(self, stat, after):
-        if not stat.false_statement:
-            return const.CODE_FRAGMENT.IF_ELSE_FRAGMENT % (
-                self._convert_multiple_statements(iter(stat.true_statement), True),
-                "undefined,__A()",
-                self.convert_expression(stat.test_expression),
-                after)
-        else:
-            return const.CODE_FRAGMENT.IF_ELSE_FRAGMENT % (
-                self._convert_multiple_statements(iter(stat.true_statement), True),
-                self._convert_multiple_statements(iter(stat.false_statement), True),
-                self.convert_expression(stat.test_expression),
-                after)
+        stat.true_statement.append(FakeBreakStatement())
+        stat.false_statement.append(FakeBreakStatement())
+
+        return const.CODE_FRAGMENT.IF_ELSE_FRAGMENT % (
+            self._convert_multiple_statements(iter(stat.true_statement)),
+            self._convert_multiple_statements(iter(stat.false_statement)),
+            self.convert_expression(stat.test_expression),
+            after)
 
     def convert_while_statement(self, stat, after):
+        stat.body_statement.append(FakeContinueStatement())
         return const.CODE_FRAGMENT.WHILE_FRAGMENT % (
             self.convert_expression(stat.test_expression),
-            self._convert_multiple_statements(iter(stat.body_statement), True, True),
+            self._convert_multiple_statements(iter(stat.body_statement)),
             after)
 
     def convert_expression(self, exp):

@@ -18,20 +18,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 predefined licenses headers
 ref from http://opensource.org
 
-some constants
+
+some FAKE abstract syntax components to make world better
 """
 
 __author__ = "rapidhere"
+__all__ = ["FakeContinueStatement", "FakeBreakStatement"]
+
+from fpjs.ast.absyn import Statement
 
 
-class CODE_FRAGMENT:
-    Y_COMBINATOR = r"(F)=>((G)=>G(G))((self)=>F(()=>self(self)))"
-    Y_COMBINATOR_NAME = r"__Y"
-    Y_COMBINATOR_FRAGMENT = Y_COMBINATOR_NAME + r"(%s)"
+class FakeContinueStatement(Statement):
+    def __init__(self):
+        pass
 
-    RUNNER_WRAP_BEGIN = r"((%s)=>" % Y_COMBINATOR_NAME
-    RUNNER_WRAP_END = r")(%s);" % Y_COMBINATOR
 
-    IF_ELSE_FRAGMENT = r"((__T,__A)=>(__T&&(%s))||(!__T&&(%s)))(%s,%s)"
-
-    WHILE_FRAGMENT = r"((__WA)=>%s)(%%s)" % (Y_COMBINATOR_FRAGMENT % "(__W)=>(%s)?(%s):__WA()")
+class FakeBreakStatement(Statement):
+    def __init__(self):
+        pass
