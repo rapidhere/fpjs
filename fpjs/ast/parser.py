@@ -70,17 +70,6 @@ def parse_statement(lexer):
     elif token == ES5Function:
         lexer.next_token()
 
-        if lexer.peek_token() == ES5LeftParenthesis:
-            lexer.back_token(token)
-
-            # anonymous function is function expression
-            # not a statement
-            exp = parse_function_expression(lexer)
-            if not exp:
-                return None
-
-            return ExpressionStatement(exp)
-
         func_id = expect_next(lexer, ES5Id)
 
         expect_next(lexer, ES5LeftParenthesis)

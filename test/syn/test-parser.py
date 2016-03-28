@@ -8,6 +8,7 @@ from fpjs.ast import ES5Parser
 
 if __name__ == "__main__":
     parser = ES5Parser()
+    # parser.load(file(os.path.join(BASE_DIR, "stand-alone-func.js")).read())
     parser.load(file(os.path.join(BASE_DIR, "demo.js")).read())
     parser.parse().ast_print()
     print ""
