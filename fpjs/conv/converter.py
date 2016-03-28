@@ -112,15 +112,7 @@ class Converter(object):
                 rstats.append("__A()")
                 break
             elif stat == FakeContinueStatement:
-                rstats.append("__W()")
-                break
-            elif stat == FakeIfContinueStatement:
-                rstats.append("(%s)?__W():__WA()" % self.convert_expression(stat.test_expression))
-                break
-            elif stat == FakeForContinueStatement:
-                rstats.append("(%s, (%s)?__W():__WA())" % (
-                    self.convert_expression(stat.increment_expression),
-                    self.convert_expression(stat.test_expression)))
+                rstats.append("__WN(__W,__WA)")
                 break
             else:
                 rstats.append(self.convert_statement(stat))
@@ -144,7 +136,7 @@ class Converter(object):
         return "__WA()"
 
     def convert_continue_statement(self, stat):
-        return "__W()"
+        return "__WN(__W,__WA)"
 
     def convert_block_statement(self, stat):
         return self._convert_multiple_statements(iter(stat))
@@ -194,21 +186,26 @@ class Converter(object):
         return const.CODE_FRAGMENT.WHILE_FRAGMENT % (
             self.convert_expression(stat.test_expression),
             self._convert_multiple_statements(iter(stat.body_statement)),
-            after)
+            after,
+            const.CODE_FRAGMENT.WN_WHILE_FRAGMENT)
 
     def convert_do_while_statement(self, stat, after):
-        stat.body_statement.append(FakeIfContinueStatement(stat.test_expression))
+        stat.body_statement.append(FakeContinueStatement())
+        wnext = const.CODE_FRAGMENT.WN_DO_WHILE_FRAGMENT % self.convert_expression(stat.test_expression)
         return const.CODE_FRAGMENT.DO_WHILE_FRAGMENT % (
             self._convert_multiple_statements(iter(stat.body_statement)),
-            after)
+            after,
+            wnext)
 
     def convert_for_statement(self, stat, after):
-        stat.body_statement.append(FakeForContinueStatement(stat.test_expression, stat.increment_expression))
-
+        stat.body_statement.append(FakeContinueStatement())
         return const.CODE_FRAGMENT.FOR_FRAGMENT % (
             self.convert_expression(stat.init_expression),
             self._convert_multiple_statements(iter(stat.body_statement)),
-            after)
+            after,
+            const.CODE_FRAGMENT.WN_FOR_FRAGMENT % (
+                self.convert_expression(stat.increment_expression),
+                self.convert_expression(stat.test_expression)))
 
     def convert_expression(self, exp):
         if not exp:
