@@ -119,7 +119,11 @@ class ES5Lexer(object):
         """
         if has left token to parse
         """
-        return self.peek_token() is not None
+        try:
+            self.peek_token()
+            return True
+        except UnexpectEOF:
+            return False
 
     def peek_token(self):
         """
