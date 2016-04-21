@@ -26,7 +26,7 @@ __author__ = "rapidhere"
 import types
 import copy
 from token import _lex_cls_order, ES5String
-from fpjs.exception import LexicalException
+from fpjs.exception import LexicalException, UnexpectEOF
 
 __all__ = ["ES5Lexer"]
 
@@ -128,7 +128,10 @@ class ES5Lexer(object):
         if not self._stored_tokens:
             self._stored_tokens.append(self._next_token())
 
-        return self._stored_tokens[0]
+        ret = self._stored_tokens[0]
+        if not ret:
+            raise UnexpectEOF()
+        return ret
 
     def next_token(self):
         """
@@ -137,7 +140,10 @@ class ES5Lexer(object):
         if not self._stored_tokens:
             self._stored_tokens.append(self._next_token())
 
-        return self._stored_tokens.pop(0)
+        ret = self._stored_tokens.pop(0)
+        if not ret:
+            raise UnexpectEOF()
+        return ret
 
     def _next_token(self):
         """

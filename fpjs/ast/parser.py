@@ -453,6 +453,20 @@ def parse_primary_expression(lexer):
         expect_next(lexer, ES5RightParenthesis)
 
         return ret
+    elif tok == ES5LeftBrace:
+        # parse object literal
+        lexer.next_token()
+        while True:
+            tok = lexer.next_token()
+            if tok != ES5Id or tok != ES5String or tok != ES5Number:
+                raise UnexpectedTokenException(tok)
+
+            expect_next(lexer, ES5Comma)
+        expect_next(lexer, ES5RightBracket)
+    elif tok == ES5LeftBracket:
+        # pass array literal
+        # TODO
+        pass
 
     return None
 
