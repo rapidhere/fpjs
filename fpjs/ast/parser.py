@@ -529,6 +529,6 @@ class ES5Parser(object):
         """
         parse the loaded content and return the ast
 
-        raise LexicalException, SyntaxExecption on error
+        raise LexicalException, SyntaxException on error
         """
         return parse_program(self.lexer)
