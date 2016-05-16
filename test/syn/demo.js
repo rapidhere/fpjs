@@ -67,3 +67,9 @@ var d = function() {
 
 break;
 continue;
+
+var e = {
+  a: b + 1,
+  "c": d.e.e.f,
+  "a": func()
+};

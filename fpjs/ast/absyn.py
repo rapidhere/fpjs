@@ -482,4 +482,29 @@ class PrimaryExpression(MemberExpression):
 
     def ast_print(self, indent=0):
         self._print(indent, "PrimaryExpression:")
-        self._print(indent + 1, self.value)
+
+        if self.value == Expression:
+            self.value.ast_print(indent + 1)
+        else:
+            self._print(indent + 1, self.value)
+
+
+class ObjectLiteral(Expression):
+    def __init__(self):
+        self.propeties = {}
+
+    def __iter__(self):
+        return iter(self.propeties)
+
+    def __setitem__(self, key, value):
+        self.propeties[key] = value
+
+    def __getitem__(self, key):
+        return self.propeties[key]
+
+    def ast_print(self, indent=0):
+        self._print(indent, "ObjectLiteral:")
+
+        for k, v in self.propeties.iteritems():
+            self._print(indent + 1, "%s ->" % str(k))
+            v.ast_print(indent + 2)

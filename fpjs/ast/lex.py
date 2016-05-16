@@ -36,9 +36,13 @@ class ES5Lexer(object):
     A simple(not full version) ES5 Lexer
     """
 
-    def __init__(self, content=""):
+    def __init__(self, content=None):
         self.content = ""
-        self.update(content)
+
+        if content is None:
+            self.update("")
+        else:
+            self.update(content)
 
         self._state_start_ch = None
         self._stored_tokens = []
@@ -198,9 +202,9 @@ class ES5Lexer(object):
 
     def __iter__(self):
         while True:
-            token = self.next_token()
-
-            if token is None:
+            try:
+                token = self.next_token()
+            except UnexpectEOF:
                 break
 
             yield token

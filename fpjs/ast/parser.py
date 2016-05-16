@@ -455,14 +455,32 @@ def parse_primary_expression(lexer):
         return ret
     elif tok == ES5LeftBrace:
         # parse object literal
+        # TODO: property assignment is not supported
         lexer.next_token()
+        ret = ObjectLiteral()
         while True:
             tok = lexer.next_token()
-            if tok != ES5Id or tok != ES5String or tok != ES5Number:
+
+            print tok
+            # get property name
+            if tok != ES5Id and tok != ES5String and tok != ES5Number:
                 raise UnexpectedTokenException(tok)
 
-            expect_next(lexer, ES5Comma)
-        expect_next(lexer, ES5RightBracket)
+            expect_next(lexer, ES5Colon)
+
+            # get property Expression
+            exp = parse_assignment_expression(lexer)
+
+            ret[tok] = exp
+
+            # check end or not
+            next_tok = lexer.next_token()
+            if next_tok == ES5RightBrace:
+                break
+            elif next_tok != ES5Comma:
+                raise UnexpectedTokenException(next_tok)
+
+        return PrimaryExpression(ret)
     elif tok == ES5LeftBracket:
         # pass array literal
         # TODO
