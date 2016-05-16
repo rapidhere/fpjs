@@ -281,7 +281,10 @@ class Converter(object):
             return "%s[%s]" % (group, self.convert_expression(exp.identifier))
 
     def convert_primary_expression(self, exp):
-        return self.convert_token(exp.value)
+        if exp.value == ObjectLiteral:
+            return self.convert_object_literal(exp.value)
+        else:
+            return self.convert_token(exp.value)
 
     def convert_args(self, args):
         ret = "("
@@ -296,3 +299,7 @@ class Converter(object):
             return '"%s"' % tok.value
 
         return tok.value
+
+    def convert_object_literal(self, o):
+        # TODO
+        pass
