@@ -65,16 +65,33 @@ class Converter(object):
             self.build_scope(ast.body_statement)
         elif ast == VariableStatement:
             for var in ast:
-                self.var_scope[var.var_id] = var
+                if var.var_id not in self.var_scope:
+                    self.var_scope[var.var_id] = var
         elif ast == BlockStatement:
             for stat in ast:
                 self.build_scope(stat)
+        elif ast == FunctionStatement:
+            self.var_scope[ast.id] = ast
 
     def build_scope_wrap_begin(self):
-        return "((" + ",".join(self.var_scope) + ")=>"
+        # sort by function Statement first
+        var = []
+        for v in self.var_scope:
+            if self.var_scope.get_by_key_value(v) == FunctionStatement:
+                var.append(v)
+        for v in self.var_scope:
+            if self.var_scope.get_by_key_value(v) != FunctionStatement:
+                var.append(v)
+
+        return "((" + ",".join(var) + ")=>"
 
     def build_scope_wrap_end(self):
-        return ")()"
+        funcs = []
+        for v in self.var_scope:
+            if self.var_scope.get_by_key_value(v) == FunctionStatement:
+                funcs.append(self.var_scope.get_by_key_value(v))
+
+        return ")(" + ",".join([self.convert_function_statement(f) for f in funcs]) + ")"
 
     def wrap_runner(self, ast):
         ret = const.CODE_FRAGMENT.RUNNER_WRAP_BEGIN
@@ -129,8 +146,17 @@ class Converter(object):
             return self.convert_variable_statement(stat)
         elif stat == BlockStatement:
             return self.convert_block_statement(stat)
+        elif stat == FunctionStatement:
+            # function statement is build in scope builder
+            # when iterator over, it will not be created
+            return "undefined"
 
         raise NotImplementedError("unsupported ast yet: " + stat.__class__.__name__)
+
+    @scope_block
+    def convert_function_statement(self, stat):
+        return ("(" + ",".join([arg_id.value for arg_id in stat.arguments]) + ")=>" +
+                self.convert_statement(stat.body_statement))
 
     def convert_break_statement(self, stat):
         return "__WA()"

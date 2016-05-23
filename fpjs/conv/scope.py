@@ -45,6 +45,9 @@ class Scope(object):
 
         raise UnknownVariable(key)
 
+    def __contains__(self, key):
+        return key.value in self.scopes[-1]
+
     def __setitem__(self, key, value):
         self.scopes[-1][key.value] = value
         return value
@@ -54,3 +57,6 @@ class Scope(object):
 
     def values(self):
         return [self.scopes[-1][key] for key in self]
+
+    def get_by_key_value(self, kv):
+        return self.scopes[-1][kv]
