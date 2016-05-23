@@ -511,3 +511,23 @@ class ObjectLiteral(Expression):
         for k, v in self.propeties.iteritems():
             self._print(indent + 1, "%s ->" % str(k))
             v.ast_print(indent + 2)
+
+
+class ArrayLiteral(Expression):
+    def __init__(self):
+        self.elements = []
+
+    def __iter__(self):
+        return iter(self.elements)
+
+    def append(self, ele):
+        self.elements.append(ele)
+
+    def ast_print(self, indent=0):
+        self._print(indent, "ArrayLiteral:")
+
+        for v in self.elements:
+            if v is None:
+                self._print(indent + 1, "undefined[NULL]")
+            else:
+                v.ast_print(indent + 1)

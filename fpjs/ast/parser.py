@@ -483,9 +483,27 @@ def parse_primary_expression(lexer):
 
         return PrimaryExpression(ret)
     elif tok == ES5LeftBracket:
-        # pass array literal
-        # TODO
-        pass
+        # parse array literal
+        lexer.next_token()
+        ret = ArrayLiteral()
+        while True:
+            tok = lexer.peek_token()
+
+            if tok == ES5Comma:
+                lexer.next_token()
+                ret.append(None)
+            elif tok == ES5RightBracket:
+                lexer.next_token()
+                break
+            else:
+                ret.append(parse_assignment_expression(lexer))
+                tok = lexer.next_token()
+
+                if tok == ES5RightBracket:
+                    break
+                elif tok != ES5Comma:
+                    raise UnexpectedTokenException(tok)
+        return PrimaryExpression(ret)
 
     return None
 

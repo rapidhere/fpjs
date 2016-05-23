@@ -283,6 +283,8 @@ class Converter(object):
     def convert_primary_expression(self, exp):
         if exp.value == ObjectLiteral:
             return self.convert_object_literal(exp.value)
+        elif exp.value == ArrayLiteral:
+            return self.convert_array_literal(exp.value)
         else:
             return self.convert_token(exp.value)
 
@@ -308,3 +310,20 @@ class Converter(object):
         props = props[:-1] + "]"
 
         return const.CODE_FRAGMENT.OBJECT_CONSTRUCTOR_FRAGMENT % props
+
+    def convert_array_literal(self, arr):
+        ret = "["
+        trim = False
+
+        for v in arr:
+            if v is None:
+                ret += ","
+                trim = False
+            else:
+                ret += "%s," % self.convert_expression(v)
+                trim = True
+
+        if trim:
+            ret = ret[:-1]
+        ret += "]"
+        return ret
