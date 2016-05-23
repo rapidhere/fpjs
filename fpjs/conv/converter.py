@@ -74,24 +74,10 @@ class Converter(object):
             self.var_scope[ast.id] = ast
 
     def build_scope_wrap_begin(self):
-        # sort by function Statement first
-        var = []
-        for v in self.var_scope:
-            if self.var_scope.get_by_key_value(v) == FunctionStatement:
-                var.append(v)
-        for v in self.var_scope:
-            if self.var_scope.get_by_key_value(v) != FunctionStatement:
-                var.append(v)
-
-        return "((" + ",".join(var) + ")=>"
+        return "((" + ",".join(self.var_scope) + ")=>"
 
     def build_scope_wrap_end(self):
-        funcs = []
-        for v in self.var_scope:
-            if self.var_scope.get_by_key_value(v) == FunctionStatement:
-                funcs.append(self.var_scope.get_by_key_value(v))
-
-        return ")(" + ",".join([self.convert_function_statement(f) for f in funcs]) + ")"
+        return ")()"
 
     def wrap_runner(self, ast):
         ret = const.CODE_FRAGMENT.RUNNER_WRAP_BEGIN
@@ -106,6 +92,14 @@ class Converter(object):
 
     def _convert_multiple_statements(self, stats):
         rstats = []
+
+        # de iter
+        stats = [s for s in stats]
+
+        # find all function statement first
+        for stat in stats:
+            if stat == FunctionStatement:
+                rstats.append("%s = %s" % (stat.id.value, self.convert_function_statement(stat)))
 
         for stat in stats:
             if (stat == IfStatement or
@@ -131,7 +125,7 @@ class Converter(object):
             elif stat == FakeContinueStatement:
                 rstats.append("__WN(__W,__WA)")
                 break
-            else:
+            elif stat != FunctionStatement:
                 rstats.append(self.convert_statement(stat))
 
         if rstats:
@@ -147,9 +141,7 @@ class Converter(object):
         elif stat == BlockStatement:
             return self.convert_block_statement(stat)
         elif stat == FunctionStatement:
-            # function statement is build in scope builder
-            # when iterator over, it will not be created
-            return "undefined"
+            return self.convert_function_statement(stat)
 
         raise NotImplementedError("unsupported ast yet: " + stat.__class__.__name__)
 
