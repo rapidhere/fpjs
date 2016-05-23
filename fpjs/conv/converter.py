@@ -301,5 +301,10 @@ class Converter(object):
         return tok.value
 
     def convert_object_literal(self, o):
-        # TODO
-        pass
+        props = "["
+        for k, v in o.iteritems():
+            props += "[%s,%s]," % (self.convert_token(k), self.convert_expression(v))
+
+        props = props[:-1] + "]"
+
+        return const.CODE_FRAGMENT.OBJECT_CONSTRUCTOR_FRAGMENT % props

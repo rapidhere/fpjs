@@ -38,7 +38,11 @@ class CODE_FRAGMENT:
     FOR_FRAGMENT = r"((__WA,__WN)=>(%s))(%%s,%%s)" % ("%s," + (Y_COMBINATOR_FRAGMENT % "(__W)=>%s"))
     WN_FOR_FRAGMENT = r"(__W,__WA)=>(%s,(%s)?__W():__WA())"
 
-    RUNNER_WRAP_BEGIN = r"((%s)=>" % Y_COMBINATOR_NAME
-    RUNNER_WRAP_END = r")(%s);" % Y_COMBINATOR
+    OBJECT_CONSTRUCTOR_NAME = r"__OC"
+    OBJECT_CONSTRUCTOR_FRAGMENT = OBJECT_CONSTRUCTOR_NAME + r"(%s)"
+    OBJECT_CONSTRUCTOR = r"(o, ro)=>(ro=new Object(),o.forEach((i)=>(ro[i[0]]=i[1])),ro)"
+
+    RUNNER_WRAP_BEGIN = r"((%s,%s)=>" % (Y_COMBINATOR_NAME, OBJECT_CONSTRUCTOR_NAME)
+    RUNNER_WRAP_END = r")(%s,%s);" % (Y_COMBINATOR, OBJECT_CONSTRUCTOR)
 
     IF_ELSE_FRAGMENT = r"((__T,__A)=>(__T&&(%s))||(!__T&&(%s)))(%s,%s)"

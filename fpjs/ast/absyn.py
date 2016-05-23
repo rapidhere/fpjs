@@ -502,6 +502,9 @@ class ObjectLiteral(Expression):
     def __getitem__(self, key):
         return self.propeties[key]
 
+    def iteritems(self):
+        return self.propeties.iteritems()
+
     def ast_print(self, indent=0):
         self._print(indent, "ObjectLiteral:")
 

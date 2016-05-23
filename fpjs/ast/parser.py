@@ -461,7 +461,8 @@ def parse_primary_expression(lexer):
         while True:
             tok = lexer.next_token()
 
-            print tok
+            if tok == ES5RightBrace:
+                break
             # get property name
             if tok != ES5Id and tok != ES5String and tok != ES5Number:
                 raise UnexpectedTokenException(tok)
