@@ -45,4 +45,4 @@ class CODE_FRAGMENT:
     RUNNER_WRAP_BEGIN = r"((%s,%s)=>" % (Y_COMBINATOR_NAME, OBJECT_CONSTRUCTOR_NAME)
     RUNNER_WRAP_END = r")(%s,%s);" % (Y_COMBINATOR, OBJECT_CONSTRUCTOR)
 
-    IF_ELSE_FRAGMENT = r"((__T,__A)=>(__T&&(%s))||(!__T&&(%s)))(%s,%s)"
+    IF_ELSE_FRAGMENT = r"((__T,__A)=>(__T?(%s):(%s)))(%s,%s)"

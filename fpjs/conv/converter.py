@@ -94,21 +94,26 @@ class Converter(object):
         rstats = []
 
         # de iter
-        stats = [s for s in stats]
+        func_stats = [s for s in stats]
+        stats = []
 
-        # find all function statement first
-        for stat in stats:
+        # filter function statement, put it in front
+        for stat in func_stats:
             if stat == FunctionStatement:
                 rstats.append("%s = %s" % (stat.id.value, self.convert_function_statement(stat)))
+            else:
+                stats.append(stat)
 
+        idx = 0
         for stat in stats:
+            idx += 1
+
             if (stat == IfStatement or
                     stat == WhileStatement or
                     stat == DoWhileStatement or
                     stat == ForStatement):
-                after = "(()=>%s)" % self._convert_multiple_statements(stats)
+                after = "(()=>%s)" % self._convert_multiple_statements(stats[idx:])
                 rstats.append(self._convert_with_after_statement(stat, after))
-
                 break
             elif stat == ReturnStatement:
                 rstats.append(self.convert_return_statement(stat))

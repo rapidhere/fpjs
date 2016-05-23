@@ -22,3 +22,8 @@ else {
     console.log("en");
   }
 }
+
+if(true)
+  console.log("should see");
+else
+  console.log("should not see");
