@@ -29,8 +29,8 @@ from fpjs.ast.token import *
 
 from fakesyn import *
 import const
-from dec import scope_block
 from scope import Scope
+from contextlib import contextmanager
 
 
 class Converter(object):
@@ -40,6 +40,22 @@ class Converter(object):
     def load(self, content):
         self.parser.load(content)
         self.var_scope = Scope()
+    
+    @contextmanager
+    def scope_context(self, ast):
+        self.var_scope.enter_scope()
+        if ast == Program:
+            for stat in ast:
+                self.build_scope(stat)
+        elif ast == FunctionExpression or ast == FunctionStatement:
+            self.build_scope(ast.body_statement)
+        else:
+            raise AssertionError("cannot build scope for ast: " + ast.__class__.__name__)
+            
+        yield
+        
+        self.var_scope.leave_scope()
+         
 
     def convert(self, print_ast=False, print_conv=False):
         ast = self.parser.parse()
@@ -86,9 +102,13 @@ class Converter(object):
 
         return ret
 
-    @scope_block
     def convert_program(self, prog):
-        return self._convert_multiple_statements(iter(prog))
+        with self.scope_context(prog):
+            ret = self.build_scope_wrap_begin()
+            ret += self._convert_multiple_statements(iter(prog))
+            ret += self.build_scope_wrap_end()
+            
+        return ret
 
     def _convert_multiple_statements(self, stats):
         rstats = []
@@ -149,11 +169,15 @@ class Converter(object):
             return self.convert_function_statement(stat)
 
         raise NotImplementedError("unsupported ast yet: " + stat.__class__.__name__)
-
-    @scope_block
+        
     def convert_function_statement(self, stat):
-        return ("(" + ",".join([arg_id.value for arg_id in stat.arguments]) + ")=>" +
-                self.convert_statement(stat.body_statement))
+        with self.scope_context(stat):
+            ret = "(" + ",".join([arg_id.value for arg_id in stat.arguments]) + ")=>"
+            ret += self.build_scope_wrap_begin()
+            ret += self.convert_statement(stat.body_statement)
+            ret += self.build_scope_wrap_end()
+        
+        return ret
 
     def convert_break_statement(self, stat):
         return "__WA()"
@@ -253,10 +277,14 @@ class Converter(object):
 
         raise NotImplementedError("unsupported ast yet: " + exp.__class__.__name__)
 
-    @scope_block
     def convert_function_expression(self, exp):
-        return ("(" + ",".join([arg_id.value for arg_id in exp.arguments]) + ")=>" +
-                self.convert_statement(exp.body_statement))
+        with self.scope_context(exp):
+            ret = "(" + ",".join([arg_id.value for arg_id in exp.arguments]) + ")=>"
+            ret += self.build_scope_wrap_begin()
+            ret += self.convert_statement(exp.body_statement)
+            ret += self.build_scope_wrap_end()
+        
+        return ret
 
     def convert_assign_expression(self, exp):
         return (self.convert_expression(exp.left_hand) +
@@ -271,8 +299,11 @@ class Converter(object):
         return ret
 
     def convert_call_expression(self, exp):
-        return (self.convert_expression(exp.callee) +
-                self.convert_args(exp.arguments))
+        callee = self.convert_expression(exp.callee)
+        if exp.callee == FunctionExpression:
+            callee = "(%s)" % callee
+            
+        return callee + self.convert_args(exp.arguments)
 
     def convert_binary_expression(self, exp):
         ret = "(%s)" % self.convert_expression(exp.left)
