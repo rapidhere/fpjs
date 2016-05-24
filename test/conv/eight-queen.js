@@ -5,7 +5,7 @@
  */
 
 var nQueen;
-for(nQueen = 5; nQueen <= 5; nQueen += 1) {
+for(nQueen = 1; nQueen <= 13; nQueen += 1) {
     console.log("Queen ", nQueen, solve(nQueen));
 }
 
