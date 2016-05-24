@@ -144,6 +144,10 @@ function func(c) {
 
 and then the fragment can rewrite with ES6
 
+```js
+(c)=>((a,b)=>(a=1,a+c))()
+```
+
 ### Loop And Recursion
 
 Loop can be convert into Recursion.
