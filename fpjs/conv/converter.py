@@ -120,7 +120,7 @@ class Converter(object):
         # filter function statement, put it in front
         for stat in func_stats:
             if stat == FunctionStatement:
-                rstats.append("%s = %s" % (stat.id.value, self.convert_function_statement(stat)))
+                rstats.append("%s=%s" % (stat.id.value, self.convert_function_statement(stat)))
             else:
                 stats.append(stat)
 
