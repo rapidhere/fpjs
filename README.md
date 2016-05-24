@@ -144,6 +144,10 @@ function func(c) {
 
 and then the fragment can rewrite with ES6
 
+### IF Statement
+
+Conditional Expression is well enough
+
 ### Loop And Recursion
 
 Loop can be convert into Recursion.
@@ -228,6 +232,17 @@ rewrite with ES6
 ```js
 (F)=>((G)=>G(G))((self)=>F(()=>self(self)))
 ```
+
+Then we can implemented LOOPs
+
+### break, continue And return
+
+TODO
+
+### Function Statement
+
+TODO
+
 
 LICENSE
 ---
