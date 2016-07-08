@@ -23,7 +23,7 @@ Usage
 Convertion Example:
 
 ```js
-// Eight Quuens problem
+// Eight Queens problem
 // Raw Programm
 var nQueen;
 for(nQueen = 1; nQueen <= 13; nQueen += 1) {
